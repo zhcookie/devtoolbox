@@ -186,6 +186,75 @@ let annotations = [];
 let currentFrame = 'none';
 let currentBg = 'transparent';
 
+// ===== Perf: rAF batching =====
+let rafId = null;
+function scheduleUpdate() {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => { rafId = null; doRender(); });
+}
+
+// ===== Perf: Background cache =====
+let bgCache = null;      // offscreen canvas
+let bgCacheKey = '';     // hash to detect when cache is invalid
+
+function bgCacheInvalid() {
+  const blurPx = currentBg === 'blur' ? (parseInt(document.getElementById('blurIntensity').value) || 30) : 0;
+  const c1 = document.getElementById('bgColor')?.value || '';
+  const c2 = document.getElementById('bgColor2')?.value || '';
+  const cw = parseInt(document.getElementById('canvasW').value) || 1200;
+  const ch = parseInt(document.getElementById('canvasH').value) || 800;
+  const key = `${currentBg}|${blurPx}|${c1}|${c2}|${cw}|${ch}`;
+  return key !== bgCacheKey;
+}
+
+function updateBgCache(cw, ch) {
+  const blurPx = currentBg === 'blur' ? (parseInt(document.getElementById('blurIntensity').value) || 30) : 0;
+  const c1 = document.getElementById('bgColor')?.value || '';
+  const c2 = document.getElementById('bgColor2')?.value || '';
+  bgCacheKey = `${currentBg}|${blurPx}|${c1}|${c2}|${cw}|${ch}`;
+
+  if (!bgCache) bgCache = document.createElement('canvas');
+  bgCache.width = cw; bgCache.height = ch;
+  const ctx = bgCache.getContext('2d');
+
+  if (currentBg === 'transparent') {
+    // Pre-render checkerboard via pattern (much faster than pixel loops)
+    const ptCanvas = document.createElement('canvas');
+    ptCanvas.width = 24; ptCanvas.height = 24;
+    const pctx = ptCanvas.getContext('2d');
+    pctx.fillStyle = '#fff'; pctx.fillRect(0, 0, 24, 24);
+    pctx.fillStyle = '#e8e8e8'; pctx.fillRect(0, 0, 12, 12); pctx.fillRect(12, 12, 12, 12);
+    ctx.fillStyle = ctx.createPattern(ptCanvas, 'repeat');
+    ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'white') {
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'black') {
+    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'gradient1') {
+    const g = ctx.createLinearGradient(0, 0, cw, ch);
+    g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'gradient2') {
+    const g = ctx.createLinearGradient(0, 0, cw, ch);
+    g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'blur') {
+    ctx.imageSmoothingEnabled = true;
+    const coverScale = Math.max(cw / img.width, ch / img.height);
+    const bw = img.width * coverScale;
+    const bh = img.height * coverScale;
+    const bx = (cw - bw) / 2;
+    const by = (ch - bh) / 2;
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(img, bx, by, bw, bh);
+    ctx.filter = 'none';
+  } else if (currentBg === 'custom') {
+    const g = ctx.createLinearGradient(0, 0, cw, ch);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  }
+}
+
 // ===== Image Loading =====
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -216,195 +285,27 @@ document.addEventListener('paste', e => {
 function loadImage(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    img = new Image();
-    img.onload = () => {
+    const newImg = new Image();
+    newImg.onload = () => {
+      img = newImg;
+      bgCacheKey = ''; // invalidate cache on new image
       dropZone.style.display = 'none';
       previewContainer.style.display = 'inline-block';
       exportBtn.disabled = false;
       exportBtn2x.disabled = false;
       document.getElementById('canvasW').value = Math.round(img.width * 1.3 + 80);
       document.getElementById('canvasH').value = Math.round(img.height * 1.3 + 80);
-      updatePreview();
+      scheduleUpdate();
     };
-    img.src = e.target.result;
+    newImg.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// ===== Rendering =====
-function updatePreview() {
-  if (!img) return;
-  const ctx = mainCanvas.getContext('2d');
-  const padding = parseInt(document.getElementById('padding').value) || 0;
-  const radius = parseInt(document.getElementById('borderRadius').value) || 0;
-  const shadowBlur = parseInt(document.getElementById('shadowBlur').value) || 0;
-  const shadowOffset = parseInt(document.getElementById('shadowOffset').value) || 0;
-  const shadowOpacity = parseInt(document.getElementById('shadowOpacity').value) / 100;
-  const scale = parseInt(document.getElementById('scale').value) / 100;
-  let cw = parseInt(document.getElementById('canvasW').value) || 1200;
-  let ch = parseInt(document.getElementById('canvasH').value) || 800;
-
-  // Update value displays
-  document.getElementById('paddingVal').textContent = padding;
-  document.getElementById('radiusVal').textContent = radius;
-  document.getElementById('shadowVal').textContent = shadowBlur;
-  document.getElementById('shadowOffVal').textContent = shadowOffset;
-  document.getElementById('shadowOpVal').textContent = shadowOpacity * 100;
-  document.getElementById('scaleVal').textContent = Math.round(scale * 100) + '%';
-
-  const imgW = img.width * scale;
-  const imgH = img.height * scale;
-  const totalW = imgW + padding * 2;
-  const totalH = imgH + padding * 2;
-
-  // Adjust canvas size
-  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
-  cw = Math.max(totalW + canvasPadding, 400);
-  ch = Math.max(totalH + canvasPadding, 300);
-  mainCanvas.width = cw;
-  mainCanvas.height = ch;
-
-  ctx.clearRect(0, 0, cw, ch);
-
-  // Background
-  const bgX = (cw - totalW) / 2 - shadowBlur / 2 + shadowOffset / 2;
-  const bgY = (ch - totalH) / 2 - shadowBlur / 2 + shadowOffset / 2;
-  const bgW = totalW + shadowBlur;
-  const bgH = totalH + shadowBlur;
-
-  // Draw background based on selection
-  if (currentBg === 'transparent') {
-    // Checkered pattern
-    const sq = 12;
-    for (let y = 0; y < ch; y += sq) {
-      for (let x = 0; x < cw; x += sq) {
-        ctx.fillStyle = ((x / sq + y / sq) % 2 === 0) ? '#e8e8e8' : '#fff';
-        ctx.fillRect(x, y, sq, sq);
-      }
-    }
-  } else if (currentBg === 'white') {
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'black') {
-    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient1') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient2') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'blur') {
-    // Scale original image to cover canvas, then blur
-    const blurPx = parseInt(document.getElementById('blurIntensity').value) || 30;
-    document.getElementById('blurIntensityVal').textContent = blurPx;
-    const coverScale = Math.max(cw / img.width, ch / img.height);
-    const bw = img.width * coverScale;
-    const bh = img.height * coverScale;
-    const bx = (cw - bw) / 2;
-    const by = (ch - bh) / 2;
-    ctx.filter = `blur(${blurPx}px)`;
-    ctx.drawImage(img, bx, by, bw, bh);
-    ctx.filter = 'none';
-  } else if (currentBg === 'custom') {
-    const c1 = document.getElementById('bgColor').value;
-    const c2 = document.getElementById('bgColor2').value;
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  }
-
-  // Image position
-  const ix = (cw - totalW) / 2;
-  const iy = (ch - totalH) / 2;
-  const iwx = ix + padding;
-  const iwy = iy + padding;
-
-  // Draw shadow
-  ctx.save();
-  ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
-  ctx.shadowBlur = shadowBlur;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = shadowOffset;
-
-  // Round rect for the image area + padding
-  const rr = (x, y, w, h, r) => {
-    ctx.beginPath();
-    const maxR = Math.min(w / 2, h / 2);
-    r = Math.min(r, maxR);
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  };
-
-  // Fill white rect behind image with shadow
-  ctx.fillStyle = '#ffffff';
-  rr(ix, iy, totalW, totalH, radius);
-  ctx.fill();
-  ctx.restore();
-
-  // Draw image (clipped to rounded rect)
-  ctx.save();
-  rr(iwx, iwy, imgW, imgH, Math.max(0, radius - padding));
-  ctx.clip();
-  ctx.drawImage(img, iwx, iwy, imgW, imgH);
-  ctx.restore();
-
-  // Draw device frame
-  if (currentFrame !== 'none') {
-    drawFrame(ctx, ix, iy, totalW, totalH, radius);
-  }
-
-  // Draw annotations
-  annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
-}
-
-function drawFrame(ctx, x, y, w, h, r) {
-  ctx.save();
-  const fw = 12; // frame margin
-  const fx = x - fw, fy = y - fw - 30, fw2 = w + fw * 2, fh2 = h + fw * 2 + 30;
-
-  if (currentFrame === 'mac') {
-    ctx.fillStyle = '#2c2c2e'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
-    ctx.fill(); ctx.stroke();
-    // Traffic light dots
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 18, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 38, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 58, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
-  } else if (currentFrame === 'iphone') {
-    ctx.fillStyle = '#1c1c1e'; ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
-    ctx.beginPath(); roundRectPath(ctx, fx - 4, fy - 12, fw2 + 8, fh2 + 24, r + 20);
-    ctx.fill(); ctx.stroke();
-    // Notch
-    ctx.fillStyle = '#333'; ctx.beginPath();
-    roundRectPath(ctx, (fx + fw2 / 2) - 40, fy - 12, 80, 8, 4);
-    ctx.fill();
-  } else if (currentFrame === 'browser') {
-    ctx.fillStyle = '#e8e8ea'; ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 16, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 32, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 48, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    // URL bar
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ddd';
-    ctx.beginPath(); roundRectPath(ctx, fx + 70, fy + 8, fw2 - 140, 14, 4);
-    ctx.fill(); ctx.stroke();
-  }
-  ctx.restore();
-}
-
+// ===== Shared helpers =====
 function roundRectPath(ctx, x, y, w, h, r) {
   const maxR = Math.min(w / 2, h / 2);
-  r = Math.min(r, maxR);
+  if (r > maxR) r = maxR;
   if (r < 0) r = 0;
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -418,20 +319,129 @@ function roundRectPath(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// ===== Main Render (called via rAF) =====
+function doRender() {
+  if (!img) return;
+  const ctx = mainCanvas.getContext('2d');
+  const padding = parseInt(document.getElementById('padding').value) || 0;
+  const radius = parseInt(document.getElementById('borderRadius').value) || 0;
+  const shadowBlur = parseInt(document.getElementById('shadowBlur').value) || 0;
+  const shadowOffset = parseInt(document.getElementById('shadowOffset').value) || 0;
+  const shadowOpacity = parseInt(document.getElementById('shadowOpacity').value) / 100;
+  const scale = parseInt(document.getElementById('scale').value) / 100;
+
+  // Update displays
+  document.getElementById('paddingVal').textContent = padding;
+  document.getElementById('radiusVal').textContent = radius;
+  document.getElementById('shadowVal').textContent = shadowBlur;
+  document.getElementById('shadowOffVal').textContent = shadowOffset;
+  document.getElementById('shadowOpVal').textContent = shadowOpacity * 100;
+  document.getElementById('scaleVal').textContent = Math.round(scale * 100) + '%';
+  if (currentBg === 'blur') {
+    document.getElementById('blurIntensityVal').textContent = parseInt(document.getElementById('blurIntensity').value) || 30;
+  }
+
+  const imgW = Math.round(img.width * scale);
+  const imgH = Math.round(img.height * scale);
+  const totalW = imgW + padding * 2;
+  const totalH = imgH + padding * 2;
+
+  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
+  const cw = Math.max(totalW + canvasPadding, 400);
+  const ch = Math.max(totalH + canvasPadding, 300);
+
+  // Only resize canvas if dimensions changed (resize is expensive)
+  if (mainCanvas.width !== cw || mainCanvas.height !== ch) {
+    mainCanvas.width = cw;
+    mainCanvas.height = ch;
+    bgCacheKey = ''; // bg cache size changed
+  }
+
+  // Update bg cache if needed
+  if (bgCacheInvalid()) {
+    updateBgCache(cw, ch);
+  }
+
+  // --- Draw ---
+  // 1. Background (from cache)
+  ctx.clearRect(0, 0, cw, ch);
+  ctx.drawImage(bgCache, 0, 0);
+
+  // 2. Shadow rect + image
+  const ix = (cw - totalW) / 2;
+  const iy = (ch - totalH) / 2;
+  const iwx = ix + padding;
+  const iwy = iy + padding;
+
+  ctx.save();
+  ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
+  ctx.shadowBlur = shadowBlur;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = shadowOffset;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); roundRectPath(ctx, ix, iy, totalW, totalH, radius);
+  ctx.fill();
+  ctx.restore();
+
+  // Draw image clipped
+  ctx.save();
+  ctx.beginPath(); roundRectPath(ctx, iwx, iwy, imgW, imgH, Math.max(0, radius - padding));
+  ctx.clip();
+  ctx.drawImage(img, iwx, iwy, imgW, imgH);
+  ctx.restore();
+
+  // 3. Device frame
+  if (currentFrame !== 'none') {
+    drawFrame(ctx, ix, iy, totalW, totalH, radius);
+  }
+
+  // 4. Annotations
+  annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
+}
+
+function drawFrame(ctx, x, y, w, h, r) {
+  ctx.save();
+  const fw = 12;
+  const fx = x - fw, fy = y - fw - 30, fw2 = w + fw * 2, fh2 = h + fw * 2 + 30;
+
+  if (currentFrame === 'mac') {
+    ctx.fillStyle = '#2c2c2e'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 18, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 38, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 58, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
+  } else if (currentFrame === 'iphone') {
+    ctx.fillStyle = '#1c1c1e'; ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+    ctx.beginPath(); roundRectPath(ctx, fx - 4, fy - 12, fw2 + 8, fh2 + 24, r + 20);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#333'; ctx.beginPath();
+    roundRectPath(ctx, (fx + fw2 / 2) - 40, fy - 12, 80, 8, 4);
+    ctx.fill();
+  } else if (currentFrame === 'browser') {
+    ctx.fillStyle = '#e8e8ea'; ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 16, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 32, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 48, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ddd';
+    ctx.beginPath(); roundRectPath(ctx, fx + 70, fy + 8, fw2 - 140, 14, 4);
+    ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawAnnotation(ctx, ann, bx, by, bw, bh) {
   if (ann.placed) {
     ctx.save();
     const x = ann.x, y = ann.y;
-    ctx.fillStyle = ann.color;
     ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, sans-serif';
     const tw = ctx.measureText(ann.text).width;
     const th = 18;
-    // arrow line
     ctx.strokeStyle = ann.color; ctx.lineWidth = 3; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + ann.arrowDx, y + ann.arrowDy); ctx.stroke();
-    // circle
     ctx.fillStyle = ann.color; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
-    // text bg
     const tx = x + ann.arrowDx + 10, ty = y + ann.arrowDy - th / 2;
     ctx.fillStyle = ann.color;
     ctx.beginPath(); roundRectPath(ctx, tx - 6, ty - 4, tw + 12, th + 10, 6);
@@ -440,23 +450,23 @@ function drawAnnotation(ctx, ann, bx, by, bw, bh) {
     ctx.fillText(ann.text, tx, ty + th - 2);
     ctx.restore();
   } else {
-    // Default placement: top-left with arrow pointing to top-left corner of image
     ann.placed = true;
-    ann.x = bx + 20;
-    ann.y = by + 20;
-    ann.arrowDx = -10;
-    ann.arrowDy = -10;
+    ann.x = bx + 20; ann.y = by + 20;
+    ann.arrowDx = -10; ann.arrowDy = -10;
     drawAnnotation(ctx, ann, bx, by, bw, bh);
   }
 }
 
-// ===== Controls =====
-document.getElementById('padding').addEventListener('input', updatePreview);
-document.getElementById('borderRadius').addEventListener('input', updatePreview);
-document.getElementById('shadowBlur').addEventListener('input', updatePreview);
-document.getElementById('shadowOffset').addEventListener('input', updatePreview);
-document.getElementById('shadowOpacity').addEventListener('input', updatePreview);
-document.getElementById('scale').addEventListener('input', updatePreview);
+// ===== Controls (all use rAF-batched scheduleUpdate) =====
+['padding','borderRadius','shadowBlur','shadowOffset','shadowOpacity','scale'].forEach(id => {
+  document.getElementById(id).addEventListener('input', scheduleUpdate);
+});
+document.getElementById('blurIntensity').addEventListener('input', () => {
+  bgCacheKey = ''; // invalidate bg cache so blur re-renders
+  scheduleUpdate();
+});
+document.getElementById('bgColor').addEventListener('input', () => { bgCacheKey = ''; scheduleUpdate(); });
+document.getElementById('bgColor2').addEventListener('input', () => { bgCacheKey = ''; scheduleUpdate(); });
 
 // Background presets
 document.getElementById('bgPresets').addEventListener('click', e => {
@@ -466,77 +476,60 @@ document.getElementById('bgPresets').addEventListener('click', e => {
   e.target.classList.add('active');
   document.getElementById('customBgRow').style.display = currentBg === 'custom' ? 'flex' : 'none';
   document.getElementById('blurRow').style.display = currentBg === 'blur' ? 'flex' : 'none';
-  updatePreview();
+  bgCacheKey = '';
+  scheduleUpdate();
 });
 
-// Frame selection
 function selectFrame(name) {
   currentFrame = name;
   document.querySelectorAll('.frame-preset').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-frame="${name}"]`).classList.add('active');
-  updatePreview();
+  scheduleUpdate();
 }
 
 // ===== Annotations =====
 function addAnnotation() {
   const text = document.getElementById('annText').value.trim();
   if (!text) return;
-  const color = document.getElementById('annColor').value;
-  annotations.push({ text, color, placed: false, x: 0, y: 0, arrowDx: 0, arrowDy: 0 });
+  annotations.push({ text, color: document.getElementById('annColor').value, placed: false });
   document.getElementById('annText').value = '';
   updateAnnotationList();
-  updatePreview();
+  scheduleUpdate();
 }
-
-function clearAnnotations() {
-  annotations = [];
-  updateAnnotationList();
-  updatePreview();
-}
-
+function clearAnnotations() { annotations = []; updateAnnotationList(); scheduleUpdate(); }
 function updateAnnotationList() {
-  const list = document.getElementById('annList');
-  list.innerHTML = annotations.map((a, i) =>
+  document.getElementById('annList').innerHTML = annotations.map((a, i) =>
     `<div class="ann-item"><span style="color:${a.color}">● ${a.text}</span><button onclick="removeAnn(${i})">✕</button></div>`
   ).join('');
 }
-
-function removeAnn(i) { annotations.splice(i, 1); updateAnnotationList(); updatePreview(); }
+function removeAnn(i) { annotations.splice(i, 1); updateAnnotationList(); scheduleUpdate(); }
 
 // ===== Export =====
 function exportPNG() { doExport(1); }
 function exportPNG2x() { doExport(2); }
 
-function doExport(scale) {
+function doExport(expScale) {
   if (!img) return;
-  // Render at export resolution
   const padding = parseInt(document.getElementById('padding').value) || 0;
   const radius = parseInt(document.getElementById('borderRadius').value) || 0;
   const shadowBlur = parseInt(document.getElementById('shadowBlur').value) || 0;
   const shadowOffset = parseInt(document.getElementById('shadowOffset').value) || 0;
   const shadowOpacity = parseInt(document.getElementById('shadowOpacity').value) / 100;
-  const imgScale = parseInt(document.getElementById('scale').value) / 100 * scale;
+  const imgScale = parseInt(document.getElementById('scale').value) / 100 * expScale;
 
-  const imgW = img.width * imgScale;
-  const imgH = img.height * imgScale;
+  const imgW = Math.round(img.width * imgScale);
+  const imgH = Math.round(img.height * imgScale);
   const totalW = imgW + padding * 2;
   const totalH = imgH + padding * 2;
   const cw = totalW + Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
   const ch = totalH + Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
 
   const expCanvas = document.createElement('canvas');
-  expCanvas.width = cw;
-  expCanvas.height = ch;
+  expCanvas.width = cw; expCanvas.height = ch;
   const ctx = expCanvas.getContext('2d');
 
-  // Same rendering logic as preview but at export resolution
-  const bgX = (cw - totalW) / 2 - shadowBlur / 2 + shadowOffset / 2;
-  const bgY = (ch - totalH) / 2 - shadowBlur / 2 + shadowOffset / 2;
-  const bgW = totalW + shadowBlur;
-  const bgH = totalH + shadowBlur;
-
+  // Draw bg (same logic as updateBgCache but at export size)
   if (currentBg === 'transparent') {
-    // For PNG export, use actual transparent background
     ctx.clearRect(0, 0, cw, ch);
   } else if (currentBg === 'white') {
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
@@ -553,68 +546,42 @@ function doExport(scale) {
   } else if (currentBg === 'blur') {
     const blurPx = parseInt(document.getElementById('blurIntensity')?.value) || 30;
     const coverScale = Math.max(cw / img.width, ch / img.height);
-    const bw = img.width * coverScale;
-    const bh = img.height * coverScale;
-    const bx = (cw - bw) / 2;
-    const by = (ch - bh) / 2;
     ctx.filter = `blur(${blurPx}px)`;
-    ctx.drawImage(img, bx, by, bw, bh);
+    ctx.drawImage(img, (cw - img.width * coverScale) / 2, (ch - img.height * coverScale) / 2, img.width * coverScale, img.height * coverScale);
     ctx.filter = 'none';
   } else if (currentBg === 'custom') {
-    const c1 = document.getElementById('bgColor')?.value || '#6366f1';
-    const c2 = document.getElementById('bgColor2')?.value || '#8b5cf6';
     const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    g.addColorStop(0, document.getElementById('bgColor')?.value || '#6366f1');
+    g.addColorStop(1, document.getElementById('bgColor2')?.value || '#8b5cf6');
     ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
   }
 
-  const ix = (cw - totalW) / 2;
-  const iy = (ch - totalH) / 2;
-  const iwx = ix + padding;
-  const iwy = iy + padding;
+  const ix = (cw - totalW) / 2, iy = (ch - totalH) / 2;
 
   ctx.save();
   ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
   ctx.shadowBlur = shadowBlur;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = shadowOffset;
+  ctx.shadowOffsetX = 0; ctx.shadowOffsetY = shadowOffset;
   ctx.fillStyle = '#ffffff';
-  rr2(ctx, ix, iy, totalW, totalH, radius);
+  ctx.beginPath(); roundRectPath(ctx, ix, iy, totalW, totalH, radius);
   ctx.fill();
   ctx.restore();
 
   ctx.save();
-  rr2(ctx, iwx, iwy, imgW, imgH, Math.max(0, radius - padding));
+  ctx.beginPath(); roundRectPath(ctx, ix + padding, iy + padding, imgW, imgH, Math.max(0, radius - padding));
   ctx.clip();
-  ctx.drawImage(img, iwx, iwy, imgW, imgH);
+  ctx.drawImage(img, ix + padding, iy + padding, imgW, imgH);
   ctx.restore();
 
-  if (currentFrame !== 'none') {
-    drawFrame(ctx, ix, iy, totalW, totalH, radius);
-  }
+  if (currentFrame !== 'none') drawFrame(ctx, ix, iy, totalW, totalH, radius);
   annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
 
   expCanvas.toBlob(blob => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `screenshot-beautified-${scale}x.png`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = `screenshot-beautified-${expScale}x.png`;
+    a.click(); URL.revokeObjectURL(url);
   }, 'image/png');
-}
-
-function rr2(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  const maxR = Math.min(w / 2, h / 2);
-  r = Math.min(r, maxR);
-  if (r < 0) r = 0;
-  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
 }
 
 // ===== Theme =====
