@@ -4,48 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>截图美化在线工具_截图加阴影圆角背景_设备框标注导出 | DevTools</title>
-<meta name="description" content="免费在线截图美化工具：给截图加圆角、阴影、渐变背景、Mac/iPhone设备框、箭头标注。纯浏览器端运行，不上传数据。一键导出高清PNG。">
+<meta name="description" content="免费在线截图美化工具：给截图加圆角、阴影、渐变背景、Mac/iPhone设备框、箭头标注。纯浏览器端运行。导出高清PNG。">
 <meta property="og:title" content="截图美化器_在线加阴影圆角背景_设备框导出 | DevTools">
 <meta property="og:description" content="上传截图，一键加圆角阴影、套设备框、添加标注，导出高清PNG。全浏览器端运行。">
 <link rel="stylesheet" href="../style.css">
 <style>
-:root { --bg: #f5f5f5; --text: #333; --text2: #666; --card: #fff; --border: #e0e0e0; --accent: #6366f1; --accent2: #8b5cf6; --shadow: 0 2px 8px rgba(0,0,0,.08); --preview-bg: #e8e8e8; }
-.dark { --bg: #1a1a2e; --text: #e0e0e0; --text2: #999; --card: #222240; --border: #333; --preview-bg: #12121f; }
-body { background: var(--bg); color: var(--text); margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
-.navbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.navbar-brand { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.theme-toggle { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem; color: var(--text); }
-.editor-wrap { display: flex; height: calc(100vh - 52px); overflow: hidden; }
-.panel-left { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--preview-bg); position: relative; overflow: auto; padding: 40px; }
-.panel-right { width: 320px; background: var(--card); border-left: 1px solid var(--border); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.drop-zone { width: 480px; max-width: 90%; aspect-ratio: 16/10; border: 3px dashed var(--border); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: .2s; color: var(--text2); gap: 12px; background: var(--card); }
-.drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(99,102,241,.05); }
-.drop-zone .icon { font-size: 3rem; }
-.drop-zone .hint { font-size: 0.8rem; }
-.preview-container { position: relative; display: inline-block; }
-.preview-container canvas { display: block; max-width: 90vw; max-height: 70vh; }
-.section-title { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); margin-bottom: 2px; }
-.ctrl-group { display: flex; flex-direction: column; gap: 6px; }
-.ctrl-row { display: flex; align-items: center; gap: 8px; }
-.ctrl-row label { font-size: 0.78rem; color: var(--text2); min-width: 44px; }
-.ctrl-row input[type=range] { flex: 1; accent-color: var(--accent); }
-.ctrl-row input[type=color] { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 2px; }
-.ctrl-row input[type=number] { width: 56px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: var(--bg); color: var(--text); text-align: center; }
-.ctrl-row select, .ctrl-row button { padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; cursor: pointer; background: var(--bg); color: var(--text); }
-.btn-primary { background: var(--accent) !important; color: #fff !important; border: none !important; font-weight: 600; padding: 10px 20px !important; width: 100%; border-radius: 10px !important; font-size: 0.9rem !important; }
-.btn-sm { padding: 5px 12px !important; font-size: 0.75rem !important; }
-.preset-btn { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.78rem; background: var(--bg); color: var(--text); white-space: nowrap; }
-.preset-btn.active { border-color: var(--accent); background: rgba(99,102,241,.1); color: var(--accent); font-weight: 600; }
-.preset-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.frame-preset { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.78rem; background: var(--bg); color: var(--text); }
-.frame-preset.active { border-color: var(--accent); background: rgba(99,102,241,.1); }
-.annotation-bar { display: none; }
-.annotation-bar.show { display: flex; gap: 6px; flex-wrap: wrap; }
-input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; background: var(--bg); color: var(--text); }
-.ann-list { max-height: 120px; overflow-y: auto; font-size: 0.75rem; }
-.ann-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); }
-.ann-item button { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.9rem; }
-@media (max-width: 768px) { .editor-wrap { flex-direction: column; } .panel-right { width: 100%; max-height: 45vh; } .panel-left { padding: 20px; } }
+:root{--bg:#f5f5f5;--text:#333;--text2:#666;--card:#fff;--border:#e0e0e0;--accent:#6366f1;--accent2:#8b5cf6;--preview-bg:#e8e8e8}
+.dark{--bg:#1a1a2e;--text:#e0e0e0;--text2:#999;--card:#222240;--border:#333;--preview-bg:#12121f}
+body{background:var(--bg);color:var(--text);margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.navbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.navbar-brand{font-weight:700;font-size:1.1rem;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:8px}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:1rem;color:var(--text)}
+.editor-wrap{display:flex;height:calc(100vh - 52px);overflow:hidden}
+.panel-left{flex:1;display:flex;align-items:center;justify-content:center;background:var(--preview-bg);position:relative;overflow:auto;padding:40px}
+.panel-right{width:320px;background:var(--card);border-left:1px solid var(--border);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.drop-zone{width:480px;max-width:90%;aspect-ratio:16/10;border:3px dashed var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s;color:var(--text2);gap:12px;background:var(--card)}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(99,102,241,.05)}
+.drop-zone .icon{font-size:3rem}
+.drop-zone .hint{font-size:.8rem}
+.preview-container{position:relative;display:inline-block}
+.preview-container canvas{display:block;max-width:90vw;max-height:70vh}
+.section-title{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:2px}
+.ctrl-group{display:flex;flex-direction:column;gap:6px}
+.ctrl-row{display:flex;align-items:center;gap:8px}
+.ctrl-row label{font-size:.78rem;color:var(--text2);min-width:44px}
+.ctrl-row input[type=range]{flex:1;accent-color:var(--accent)}
+.ctrl-row input[type=color]{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px}
+.ctrl-row input[type=number]{width:50px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:.8rem;background:var(--bg);color:var(--text);text-align:center}
+.ctrl-row select,.ctrl-row button{padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78rem;cursor:pointer;background:var(--bg);color:var(--text)}
+.btn-primary{background:var(--accent)!important;color:#fff!important;border:none!important;font-weight:600;padding:10px 20px!important;width:100%;border-radius:10px!important;font-size:.9rem!important}
+.btn-sm{padding:4px 10px!important;font-size:.75rem!important}
+.preset-btn{padding:6px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;background:var(--bg);color:var(--text);white-space:nowrap}
+.preset-btn.active{border-color:var(--accent);background:rgba(99,102,241,.1);color:var(--accent);font-weight:600}
+.preset-row{display:flex;flex-wrap:wrap;gap:6px}
+.frame-preset{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;background:var(--bg);color:var(--text)}
+.frame-preset.active{border-color:var(--accent);background:rgba(99,102,241,.1)}
+.ann-list{max-height:100px;overflow-y:auto;font-size:.75rem}
+.ann-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)}
+.ann-item button{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:.9rem}
+@media(max-width:768px){.editor-wrap{flex-direction:column}.panel-right{width:100%;max-height:45vh}.panel-left{padding:20px}}
 </style>
 </head>
 <body>
@@ -53,13 +50,12 @@ input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); b
 <nav class="navbar">
   <a href="/" class="navbar-brand"><span>🔧</span> DevTools</a>
   <div style="display:flex;align-items:center;gap:12px">
-    <span style="font-size:0.78rem;color:var(--text2)">📸 截图美化器</span>
-    <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">🌓</button>
+    <span style="font-size:.78rem;color:var(--text2)">📸 截图美化器</span>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
   </div>
 </nav>
 
 <div class="editor-wrap">
-  <!-- Preview area -->
   <div class="panel-left" id="previewArea">
     <div class="drop-zone" id="dropZone">
       <div class="icon">📸</div>
@@ -72,8 +68,8 @@ input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); b
     </div>
   </div>
 
-  <!-- Controls -->
-  <div class="panel-right" id="controlPanel">
+  <div class="panel-right">
+    <!-- Background -->
     <div class="ctrl-group">
       <div class="section-title">🖼️ 背景</div>
       <div class="preset-row" id="bgPresets">
@@ -86,48 +82,25 @@ input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); b
         <button class="preset-btn" data-bg="custom">自定义渐变</button>
       </div>
       <div class="ctrl-row" id="customBgRow" style="display:none">
-        <label>颜色</label><input type="color" id="bgColor" value="#6366f1">
-        <label>渐变2</label><input type="color" id="bgColor2" value="#8b5cf6">
+        <input type="color" id="bgColor" value="#6366f1"><input type="color" id="bgColor2" value="#8b5cf6">
       </div>
       <div class="ctrl-row" id="blurRow" style="display:none">
-        <label>模糊度</label>
-        <input type="range" id="blurIntensity" min="5" max="80" value="30" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="blurIntensityVal">30</span>
+        <label>模糊度</label><input type="range" id="blurIntensity" min="5" max="80" value="30">
+        <span style="font-size:.75rem;min-width:24px" id="blurVal">30</span>
       </div>
-      <div class="ctrl-row">
-        <label>内边距</label>
-        <input type="range" id="padding" min="0" max="120" value="40" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="paddingVal">40</span>
-      </div>
+      <div class="ctrl-row"><label>内边距</label><input type="range" id="padding" min="0" max="120" value="40"><span style="font-size:.75rem;min-width:24px" id="paddingVal">40</span></div>
     </div>
 
+    <!-- Corners & Shadow -->
     <div class="ctrl-group">
-      <div class="section-title">🔲 圆角</div>
-      <div class="ctrl-row">
-        <input type="range" id="borderRadius" min="0" max="80" value="16" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="radiusVal">16</span>
-      </div>
+      <div class="section-title">🔲 圆角 & 阴影</div>
+      <div class="ctrl-row"><label>圆角</label><input type="range" id="borderRadius" min="0" max="80" value="16"><span style="font-size:.75rem;min-width:24px" id="radiusVal">16</span></div>
+      <div class="ctrl-row"><label>阴影</label><input type="range" id="shadowBlur" min="0" max="60" value="20"><span style="font-size:.75rem;min-width:24px" id="shadowVal">20</span></div>
+      <div class="ctrl-row"><label>偏移</label><input type="range" id="shadowOffset" min="0" max="30" value="4"><span style="font-size:.75rem;min-width:24px" id="shadowOffVal">4</span></div>
+      <div class="ctrl-row"><label>不透明</label><input type="range" id="shadowOpacity" min="5" max="60" value="25"><span style="font-size:.75rem;min-width:24px" id="shadowOpVal">25</span></div>
     </div>
 
-    <div class="ctrl-group">
-      <div class="section-title">🌑 阴影</div>
-      <div class="ctrl-row">
-        <label>大小</label>
-        <input type="range" id="shadowBlur" min="0" max="60" value="20" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="shadowVal">20</span>
-      </div>
-      <div class="ctrl-row">
-        <label>偏移</label>
-        <input type="range" id="shadowOffset" min="0" max="30" value="4" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="shadowOffVal">4</span>
-      </div>
-      <div class="ctrl-row">
-        <label>透明度</label>
-        <input type="range" id="shadowOpacity" min="5" max="60" value="25" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:28px" id="shadowOpVal">25</span>
-      </div>
-    </div>
-
+    <!-- Device Frame -->
     <div class="ctrl-group">
       <div class="section-title">📱 设备框</div>
       <div style="display:flex;flex-direction:column;gap:6px">
@@ -138,495 +111,333 @@ input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); b
       </div>
     </div>
 
+    <!-- Annotation -->
     <div class="ctrl-group">
       <div class="section-title">✏️ 标注</div>
-      <div class="ctrl-row">
-        <input type="text" id="annText" placeholder="标注文字..." maxlength="60">
-        <select id="annColor">
-          <option value="#ff4757">🔴</option>
-          <option value="#ff6b81">🩷</option>
-          <option value="#ffa502">🟠</option>
-          <option value="#2ed573">🟢</option>
-          <option value="#1e90ff">🔵</option>
-          <option value="#a55eea">🟣</option>
-          <option value="#fff" style="color:#000">⚪</option>
-          <option value="#000">⚫</option>
-        </select>
-        <button class="btn-sm" onclick="addAnnotation()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;">添加</button>
-        <button class="btn-sm" onclick="clearAnnotations()">清除</button>
-      </div>
+      <div class="ctrl-row"><input type="text" id="annText" placeholder="标注文字..." maxlength="60"><select id="annColor"><option value="#ff4757">🔴</option><option value="#ff6b81">🩷</option><option value="#ffa502">🟠</option><option value="#2ed573">🟢</option><option value="#1e90ff">🔵</option><option value="#a55eea">🟣</option><option value="#fff" style="color:#000">⚪</option><option value="#000">⚫</option></select></div>
+      <div class="ctrl-row"><label>字体</label><select id="annFont"><option value="Arial,sans-serif">Arial</option><option value="Georgia,serif">Georgia</option><option value="'Courier New',monospace">Courier</option><option value="'PingFang SC','Microsoft YaHei',sans-serif" selected>苹方/雅黑</option><option value="'KaiTi','STKaiti',serif">楷体</option></select></div>
+      <div class="ctrl-row"><label>大小</label><input type="range" id="annSize" min="12" max="48" value="16"><span style="font-size:.75rem;min-width:24px" id="annSizeVal">16</span></div>
+      <div class="ctrl-row"><label>背景</label><select id="annBgStyle"><option value="solid">纯色背景</option><option value="outline">仅描边</option><option value="blur">毛玻璃 🔥</option><option value="none">无背景</option></select></div>
+      <button class="btn-sm" onclick="addAnnotation()" style="background:var(--accent);color:#fff;border:none;border-radius:6px">添加标注</button>
+      <button class="btn-sm" onclick="clearAnnotations()">清除全部</button>
       <div class="ann-list" id="annList"></div>
     </div>
 
+    <!-- Size -->
     <div class="ctrl-group">
       <div class="section-title">📐 尺寸</div>
-      <div class="ctrl-row">
-        <label>缩放</label>
-        <input type="range" id="scale" min="50" max="150" value="100" oninput="updatePreview()">
-        <span style="font-size:0.75rem;min-width:36px" id="scaleVal">100%</span>
-      </div>
-      <div class="ctrl-row">
-        <label>画布宽</label>
-        <input type="number" id="canvasW" value="1200" onchange="updatePreview()">
-        <label>高</label>
-        <input type="number" id="canvasH" value="800" onchange="updatePreview()">
-      </div>
+      <div class="ctrl-row"><label>缩放</label><input type="range" id="scale" min="50" max="150" value="100"><span style="font-size:.75rem;min-width:36px" id="scaleVal">100%</span></div>
+      <div class="ctrl-row"><label>画布 W</label><input type="number" id="canvasW" value="1200"><label>H</label><input type="number" id="canvasH" value="800"></div>
     </div>
 
     <button class="btn-primary" onclick="exportPNG()" id="exportBtn" disabled>📥 导出高清 PNG</button>
-    <button class="btn-primary" onclick="exportPNG2x()" id="exportBtn2x" disabled style="background:#8b5cf6 !important;margin-top:-8px">📥 导出 2x 高清 (Retina)</button>
-    <p style="font-size:0.7rem;color:var(--text2);text-align:center;margin:0">所有处理在浏览器端完成，不上传服务器</p>
+    <button class="btn-primary" onclick="exportPNG2x()" id="exportBtn2x" disabled style="background:#8b5cf6!important;margin-top:-8px">📥 导出 2x Retina</button>
+    <p style="font-size:.7rem;color:var(--text2);text-align:center;margin:0">全部浏览器端处理，数据不上传</p>
   </div>
 </div>
 
 <script>
 // ===== State =====
-let img = null;
-let annotations = [];
-let currentFrame = 'none';
-let currentBg = 'transparent';
+let img = null, annotations = [], currentFrame = 'none', currentBg = 'transparent';
 
-// ===== Perf: rAF batching =====
+// ===== rAF batching =====
 let rafId = null;
-function scheduleUpdate() {
-  if (rafId) return;
-  rafId = requestAnimationFrame(() => { rafId = null; doRender(); });
+function schedule() { if(!rafId) rafId = requestAnimationFrame(()=>{rafId=null;render();}); }
+
+// ===== Background cache =====
+let bgCache = null, bgKey = '';
+function bgStale() {
+  const b = currentBg==='blur' ? (parseInt(document.getElementById('blurIntensity').value)||30) : 0;
+  const c1 = document.getElementById('bgColor')?.value||'', c2 = document.getElementById('bgColor2')?.value||'';
+  const cw = parseInt(document.getElementById('canvasW').value)||1200, ch = parseInt(document.getElementById('canvasH').value)||800;
+  return bgKey !== `${currentBg}|${b}|${c1}|${c2}|${cw}|${ch}`;
+}
+function updateBgCache(cw,ch){
+  const blurPx = currentBg==='blur' ? (parseInt(document.getElementById('blurIntensity').value)||30) : 0;
+  const c1 = document.getElementById('bgColor')?.value||'', c2 = document.getElementById('bgColor2')?.value||'';
+  bgKey = `${currentBg}|${blurPx}|${c1}|${c2}|${cw}|${ch}`;
+  if(!bgCache) bgCache = document.createElement('canvas');
+  bgCache.width=cw; bgCache.height=ch;
+  const c = bgCache.getContext('2d');
+  if(currentBg==='transparent'){
+    const p=document.createElement('canvas'); p.width=24; p.height=24;
+    const pc=p.getContext('2d'); pc.fillStyle='#fff'; pc.fillRect(0,0,24,24);
+    pc.fillStyle='#e8e8e8'; pc.fillRect(0,0,12,12); pc.fillRect(12,12,12,12);
+    c.fillStyle=c.createPattern(p,'repeat'); c.fillRect(0,0,cw,ch);
+  } else if(currentBg==='white'){ c.fillStyle='#fff'; c.fillRect(0,0,cw,ch); }
+  else if(currentBg==='black'){ c.fillStyle='#1a1a2e'; c.fillRect(0,0,cw,ch); }
+  else if(currentBg==='gradient1'){ const g=c.createLinearGradient(0,0,cw,ch); g.addColorStop(0,'#667eea'); g.addColorStop(1,'#764ba2'); c.fillStyle=g; c.fillRect(0,0,cw,ch); }
+  else if(currentBg==='gradient2'){ const g=c.createLinearGradient(0,0,cw,ch); g.addColorStop(0,'#f093fb'); g.addColorStop(1,'#f5576c'); c.fillStyle=g; c.fillRect(0,0,cw,ch); }
+  else if(currentBg==='blur'){ const s=Math.max(cw/img.width,ch/img.height); c.filter=`blur(${blurPx}px)`; c.drawImage(img,(cw-img.width*s)/2,(ch-img.height*s)/2,img.width*s,img.height*s); c.filter='none'; }
+  else if(currentBg==='custom'){ const g=c.createLinearGradient(0,0,cw,ch); g.addColorStop(0,c1); g.addColorStop(1,c2); c.fillStyle=g; c.fillRect(0,0,cw,ch); }
 }
 
-// ===== Perf: Background cache =====
-let bgCache = null;      // offscreen canvas
-let bgCacheKey = '';     // hash to detect when cache is invalid
-
-function bgCacheInvalid() {
-  const blurPx = currentBg === 'blur' ? (parseInt(document.getElementById('blurIntensity').value) || 30) : 0;
-  const c1 = document.getElementById('bgColor')?.value || '';
-  const c2 = document.getElementById('bgColor2')?.value || '';
-  const cw = parseInt(document.getElementById('canvasW').value) || 1200;
-  const ch = parseInt(document.getElementById('canvasH').value) || 800;
-  const key = `${currentBg}|${blurPx}|${c1}|${c2}|${cw}|${ch}`;
-  return key !== bgCacheKey;
+// ===== Image loading =====
+const dz=document.getElementById('dropZone'), fi=document.getElementById('fileInput'),
+      pc=document.getElementById('previewContainer'), mc=document.getElementById('mainCanvas'),
+      eb=document.getElementById('exportBtn'), eb2=document.getElementById('exportBtn2x');
+dz.addEventListener('click',()=>fi.click());
+fi.addEventListener('change',e=>{if(e.target.files[0]) loadImage(e.target.files[0]);});
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');if(e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);});
+document.addEventListener('paste',e=>{const it=e.clipboardData?.items;if(it) for(const i of it) if(i.type.startsWith('image/')){loadImage(i.getAsFile());break;}});
+function loadImage(file){
+  const r=new FileReader(); r.onload=e=>{
+    const ni=new Image(); ni.onload=()=>{img=ni;bgKey='';dz.style.display='none';pc.style.display='inline-block';eb.disabled=eb2.disabled=false;document.getElementById('canvasW').value=Math.round(img.width*1.3+80);document.getElementById('canvasH').value=Math.round(img.height*1.3+80);schedule();};
+    ni.src=e.target.result;
+  }; r.readAsDataURL(file);
 }
 
-function updateBgCache(cw, ch) {
-  const blurPx = currentBg === 'blur' ? (parseInt(document.getElementById('blurIntensity').value) || 30) : 0;
-  const c1 = document.getElementById('bgColor')?.value || '';
-  const c2 = document.getElementById('bgColor2')?.value || '';
-  bgCacheKey = `${currentBg}|${blurPx}|${c1}|${c2}|${cw}|${ch}`;
-
-  if (!bgCache) bgCache = document.createElement('canvas');
-  bgCache.width = cw; bgCache.height = ch;
-  const ctx = bgCache.getContext('2d');
-
-  if (currentBg === 'transparent') {
-    // Pre-render checkerboard via pattern (much faster than pixel loops)
-    const ptCanvas = document.createElement('canvas');
-    ptCanvas.width = 24; ptCanvas.height = 24;
-    const pctx = ptCanvas.getContext('2d');
-    pctx.fillStyle = '#fff'; pctx.fillRect(0, 0, 24, 24);
-    pctx.fillStyle = '#e8e8e8'; pctx.fillRect(0, 0, 12, 12); pctx.fillRect(12, 12, 12, 12);
-    ctx.fillStyle = ctx.createPattern(ptCanvas, 'repeat');
-    ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'white') {
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'black') {
-    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient1') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient2') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'blur') {
-    ctx.imageSmoothingEnabled = true;
-    const coverScale = Math.max(cw / img.width, ch / img.height);
-    const bw = img.width * coverScale;
-    const bh = img.height * coverScale;
-    const bx = (cw - bw) / 2;
-    const by = (ch - bh) / 2;
-    ctx.filter = `blur(${blurPx}px)`;
-    ctx.drawImage(img, bx, by, bw, bh);
-    ctx.filter = 'none';
-  } else if (currentBg === 'custom') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  }
+// ===== Helpers =====
+function rr(ctx,x,y,w,h,r){
+  const m=Math.min(w/2,h/2); if(r>m) r=m; if(r<0) r=0;
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
 }
 
-// ===== Image Loading =====
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const previewContainer = document.getElementById('previewContainer');
-const mainCanvas = document.getElementById('mainCanvas');
-const exportBtn = document.getElementById('exportBtn');
-const exportBtn2x = document.getElementById('exportBtn2x');
+// ===== Main render =====
+function render(){
+  if(!img) return;
+  const ctx=mc.getContext('2d');
+  const pad=parseInt(document.getElementById('padding').value)||0;
+  const rad=parseInt(document.getElementById('borderRadius').value)||0;
+  const sBlur=parseInt(document.getElementById('shadowBlur').value)||0;
+  const sOff=parseInt(document.getElementById('shadowOffset').value)||0;
+  const sOp=parseInt(document.getElementById('shadowOpacity').value)/100;
+  const sc=parseInt(document.getElementById('scale').value)/100;
+  const annSize=parseInt(document.getElementById('annSize').value)||16;
 
-dropZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+  // Update labels
+  document.getElementById('paddingVal').textContent=pad; document.getElementById('radiusVal').textContent=rad;
+  document.getElementById('shadowVal').textContent=sBlur; document.getElementById('shadowOffVal').textContent=sOff;
+  document.getElementById('shadowOpVal').textContent=sOp*100; document.getElementById('scaleVal').textContent=Math.round(sc*100)+'%';
+  document.getElementById('annSizeVal').textContent=annSize;
+  if(currentBg==='blur') document.getElementById('blurVal').textContent=parseInt(document.getElementById('blurIntensity').value)||30;
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) loadImage(file);
-});
+  const iw=Math.round(img.width*sc), ih=Math.round(img.height*sc);
+  const tw=iw+pad*2, th=ih+pad*2;
 
-document.addEventListener('paste', e => {
-  const items = e.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
-  }
-});
+  // Frame extra spacing
+  const fOn=currentFrame!=='none';
+  const fm=fOn?16:0; // frame margin
+  const fth=(currentFrame==='mac'||currentFrame==='browser')?34:0; // title bar height
 
-function loadImage(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const newImg = new Image();
-    newImg.onload = () => {
-      img = newImg;
-      bgCacheKey = ''; // invalidate cache on new image
-      dropZone.style.display = 'none';
-      previewContainer.style.display = 'inline-block';
-      exportBtn.disabled = false;
-      exportBtn2x.disabled = false;
-      document.getElementById('canvasW').value = Math.round(img.width * 1.3 + 80);
-      document.getElementById('canvasH').value = Math.round(img.height * 1.3 + 80);
-      scheduleUpdate();
-    };
-    newImg.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+  const cp=Math.max(sBlur*2+sOff+rad+fm,40);
+  const cw=Math.max(tw+cp*2,400), ch=Math.max(th+cp*2+fth,300);
+
+  if(mc.width!==cw||mc.height!==ch){mc.width=cw;mc.height=ch;bgKey='';}
+  if(bgStale()) updateBgCache(cw,ch);
+
+  const ix=(cw-tw)/2, iy=(ch-th)/2+fth/2;
+
+  // 1. Background
+  ctx.clearRect(0,0,cw,ch); ctx.drawImage(bgCache,0,0);
+
+  // 2. Frame (draw BEFORE image, stroke only - no fill over image area)
+  if(fOn) drawFrame(ctx,ix-fm,iy-fm-fth,tw+fm*2,th+fm*2+fth,rad);
+
+  // 3. White rect + shadow + image
+  ctx.save(); ctx.shadowColor=`rgba(0,0,0,${sOp})`; ctx.shadowBlur=sBlur; ctx.shadowOffsetX=0; ctx.shadowOffsetY=sOff;
+  ctx.fillStyle='#fff'; rr(ctx,ix,iy,tw,th,rad); ctx.fill(); ctx.restore();
+  ctx.save(); rr(ctx,ix+pad,iy+pad,iw,ih,Math.max(0,rad-pad)); ctx.clip(); ctx.drawImage(img,ix+pad,iy+pad,iw,ih); ctx.restore();
+
+  // 4. Annotations
+  annotations.forEach(a=>drawAnnotation(ctx,a,ix,iy,tw,th,annSize));
 }
 
-// ===== Shared helpers =====
-function roundRectPath(ctx, x, y, w, h, r) {
-  const maxR = Math.min(w / 2, h / 2);
-  if (r > maxR) r = maxR;
-  if (r < 0) r = 0;
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-// ===== Main Render (called via rAF) =====
-function doRender() {
-  if (!img) return;
-  const ctx = mainCanvas.getContext('2d');
-  const padding = parseInt(document.getElementById('padding').value) || 0;
-  const radius = parseInt(document.getElementById('borderRadius').value) || 0;
-  const shadowBlur = parseInt(document.getElementById('shadowBlur').value) || 0;
-  const shadowOffset = parseInt(document.getElementById('shadowOffset').value) || 0;
-  const shadowOpacity = parseInt(document.getElementById('shadowOpacity').value) / 100;
-  const scale = parseInt(document.getElementById('scale').value) / 100;
-
-  // Update displays
-  document.getElementById('paddingVal').textContent = padding;
-  document.getElementById('radiusVal').textContent = radius;
-  document.getElementById('shadowVal').textContent = shadowBlur;
-  document.getElementById('shadowOffVal').textContent = shadowOffset;
-  document.getElementById('shadowOpVal').textContent = shadowOpacity * 100;
-  document.getElementById('scaleVal').textContent = Math.round(scale * 100) + '%';
-  if (currentBg === 'blur') {
-    document.getElementById('blurIntensityVal').textContent = parseInt(document.getElementById('blurIntensity').value) || 30;
-  }
-
-  const imgW = Math.round(img.width * scale);
-  const imgH = Math.round(img.height * scale);
-  const totalW = imgW + padding * 2;
-  const totalH = imgH + padding * 2;
-
-  // Extra space for device frame
-  const frameMargin = currentFrame !== 'none' ? 16 : 0;
-  const frameTitleH = (currentFrame === 'mac' || currentFrame === 'browser') ? 34 : 0;
-
-  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius + frameMargin, 40);
-  const cw = Math.max(totalW + canvasPadding * 2, 400);
-  const ch = Math.max(totalH + canvasPadding * 2 + frameTitleH, 300);
-
-  // Only resize canvas if dimensions changed (resize is expensive)
-  if (mainCanvas.width !== cw || mainCanvas.height !== ch) {
-    mainCanvas.width = cw;
-    mainCanvas.height = ch;
-    bgCacheKey = ''; // bg cache size changed
-  }
-
-  // Update bg cache if needed
-  if (bgCacheInvalid()) {
-    updateBgCache(cw, ch);
-  }
-
-  // --- Draw ---
-  // 1. Background (from cache)
-  ctx.clearRect(0, 0, cw, ch);
-  ctx.drawImage(bgCache, 0, 0);
-
-  // Image position (centered, shifted down for frame title bar)
-  const ix = (cw - totalW) / 2;
-  const iy = (ch - totalH) / 2 + frameTitleH / 2;
-  const iwx = ix + padding;
-  const iwy = iy + padding;
-
-  // 2. Device frame background (drawn under image)
-  if (currentFrame !== 'none') {
-    drawFrameBg(ctx, ix, iy, totalW, totalH, radius);
-  }
-
-  // 3. Shadow rect + image (drawn on top of frame bg)
+// ===== Frame drawing (borders + title bar only, NO fill over image) =====
+function drawFrame(ctx,fx,fy,fw,fh,r){
   ctx.save();
-  ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
-  ctx.shadowBlur = shadowBlur;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = shadowOffset;
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath(); roundRectPath(ctx, ix, iy, totalW, totalH, radius);
-  ctx.fill();
-  ctx.restore();
+  const or=r+6;
 
-  // Draw image clipped
-  ctx.save();
-  ctx.beginPath(); roundRectPath(ctx, iwx, iwy, imgW, imgH, Math.max(0, radius - padding));
-  ctx.clip();
-  ctx.drawImage(img, iwx, iwy, imgW, imgH);
-  ctx.restore();
-
-  // 4. Device frame decorations (drawn on top of image)
-  if (currentFrame !== 'none') {
-    drawFrameDecorations(ctx, ix, iy, totalW, totalH, radius);
-  }
-
-  // 5. Annotations
-  annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
-}
-
-function drawFrameBg(ctx, x, y, w, h, r) {
-  ctx.save();
-  const fw = 16;
-
-  if (currentFrame === 'mac' || currentFrame === 'browser') {
-    const fx = x - fw, fy = y - fw - 34, fw2 = w + fw * 2, fh2 = h + fw * 2 + 34;
-    // Frame shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 8;
-    ctx.fillStyle = currentFrame === 'mac' ? '#2c2c2e' : '#e8e8ea';
-    ctx.strokeStyle = currentFrame === 'mac' ? '#555' : '#ccc';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 8);
-    ctx.fill(); ctx.stroke();
-    // Reset shadow
-    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-  } else if (currentFrame === 'iphone') {
-    const fx = x - fw, fy = y - fw, fw2 = w + fw * 2, fh2 = h + fw * 2;
-    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 8;
-    ctx.fillStyle = '#1c1c1e';
-    ctx.strokeStyle = '#444'; ctx.lineWidth = 3;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 20);
-    ctx.fill(); ctx.stroke();
-    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  if(currentFrame==='mac'){
+    // Dark outline
+    ctx.strokeStyle='#555'; ctx.lineWidth=2; rr(ctx,fx,fy,fw,fh,or); ctx.stroke();
+    // Title bar strip (above image only)
+    ctx.fillStyle='#2c2c2e'; rr(ctx,fx,fy,fw,40,or); ctx.fill();
+    // Traffic lights
+    ctx.fillStyle='#ff5f57'; ctx.beginPath(); ctx.arc(fx+20,fy+20,6.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#febc2e'; ctx.beginPath(); ctx.arc(fx+40,fy+20,6.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#28c840'; ctx.beginPath(); ctx.arc(fx+60,fy+20,6.5,0,Math.PI*2); ctx.fill();
+  } else if(currentFrame==='browser'){
+    ctx.strokeStyle='#ccc'; ctx.lineWidth=2; rr(ctx,fx,fy,fw,fh,or); ctx.stroke();
+    ctx.fillStyle='#e8e8ea'; rr(ctx,fx,fy,fw,40,or); ctx.fill();
+    ctx.fillStyle='#ff5f57'; ctx.beginPath(); ctx.arc(fx+20,fy+20,5.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#febc2e'; ctx.beginPath(); ctx.arc(fx+38,fy+20,5.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#28c840'; ctx.beginPath(); ctx.arc(fx+56,fy+20,5.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.strokeStyle='#ddd'; ctx.lineWidth=1;
+    rr(ctx,fx+80,fy+12,fw-160,16,5); ctx.fill(); ctx.stroke();
+  } else if(currentFrame==='iphone'){
+    // Thick bezel stroke
+    ctx.strokeStyle='#1c1c1e'; ctx.lineWidth=10; rr(ctx,fx,fy,fw,fh,r+20); ctx.stroke();
+    // Dynamic Island
+    ctx.fillStyle='#1c1c1e'; rr(ctx,fx+fw/2-50,fy-3,100,26,13); ctx.fill();
   }
   ctx.restore();
 }
 
-function drawFrameDecorations(ctx, x, y, w, h, r) {
+// ===== Annotation drawing =====
+function drawAnnotation(ctx,a,bx,by,bw,bh,annSize){
+  if(!a.placed){a.placed=true;a.x=bx+30;a.y=by+30;a.arrowDx=-15;a.arrowDy=-15;}
+  const x=a.x, y=a.y, dx=a.arrowDx, dy=a.arrowDy;
+  const font=`bold ${annSize}px ${a.font||"'PingFang SC','Microsoft YaHei',sans-serif"}`;
+  const bgStyle=a.bgStyle||'solid';
+  const color=a.color;
+
   ctx.save();
-  const fw = 16;
+  ctx.font=font;
+  const tw=ctx.measureText(a.text).width, th=annSize*1.1;
 
-  if (currentFrame === 'mac') {
-    const fx = x - fw, fy = y - fw - 34;
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 22, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 44, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 66, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
-  } else if (currentFrame === 'iphone') {
-    const fx = x - fw, fy = y - fw, fw2 = w + fw * 2;
-    // Dynamic Island notch
-    ctx.fillStyle = '#1c1c1e';
-    ctx.beginPath(); roundRectPath(ctx, fx + fw2 / 2 - 50, fy - 4, 100, 26, 13);
-    ctx.fill();
-  } else if (currentFrame === 'browser') {
-    const fx = x - fw, fy = y - fw - 34, fw2 = w + fw * 2;
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 20, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 38, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 56, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
-    // URL bar
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx + 80, fy + 10, fw2 - 160, 14, 5);
-    ctx.fill(); ctx.stroke();
-  }
-  ctx.restore();
-}
+  // Arrow
+  ctx.strokeStyle=color; ctx.lineWidth=Math.max(2,annSize/8); ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx,y+dy); ctx.stroke();
+  // Dot
+  ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,Math.max(4,annSize/4),0,Math.PI*2); ctx.fill();
 
-function drawAnnotation(ctx, ann, bx, by, bw, bh) {
-  if (ann.placed) {
-    ctx.save();
-    const x = ann.x, y = ann.y;
-    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, sans-serif';
-    const tw = ctx.measureText(ann.text).width;
-    const th = 18;
-    ctx.strokeStyle = ann.color; ctx.lineWidth = 3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + ann.arrowDx, y + ann.arrowDy); ctx.stroke();
-    ctx.fillStyle = ann.color; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
-    const tx = x + ann.arrowDx + 10, ty = y + ann.arrowDy - th / 2;
-    ctx.fillStyle = ann.color;
-    ctx.beginPath(); roundRectPath(ctx, tx - 6, ty - 4, tw + 12, th + 10, 6);
-    ctx.fill();
-    ctx.fillStyle = (ann.color === '#fff' || ann.color === '#ffa502' || ann.color === '#2ed573') ? '#000' : '#fff';
-    ctx.fillText(ann.text, tx, ty + th - 2);
+  // Text position
+  const tx=x+dx+12, ty=y+dy-th/2, tpad=Math.max(8,annSize/2);
+
+  // Background
+  if(bgStyle==='blur'){
+    // Save the area behind text, blur it (use ctx from the canvas we're drawing on)
+    const srcData=ctx.getImageData(Math.max(0,tx-tpad),Math.max(0,ty-tpad),Math.round(tw+tpad*2),Math.round(th+tpad*2));
+    const tmpC=document.createElement('canvas'); tmpC.width=Math.round(tw+tpad*2); tmpC.height=Math.round(th+tpad*2);
+    const tc=tmpC.getContext('2d'); tc.putImageData(srcData,0,0);
+    tc.filter='blur(12px)'; tc.globalCompositeOperation='source-over';
+    tc.drawImage(tmpC,0,0); tc.filter='none';
+    // Semi-transparent overlay
+    tc.fillStyle='rgba(255,255,255,0.5)'; tc.fillRect(0,0,tmpC.width,tmpC.height);
+    // Draw blurred bg
+    rr(ctx,tx-tpad,ty-tpad,tw+tpad*2,th+tpad*2,6); ctx.save(); ctx.clip();
+    ctx.drawImage(tmpC,tx-tpad,ty-tpad);
     ctx.restore();
+    // Border
+    ctx.strokeStyle=color; ctx.lineWidth=1.5;
+    rr(ctx,tx-tpad,ty-tpad,tw+tpad*2,th+tpad*2,6); ctx.stroke();
+  } else if(bgStyle==='solid'){
+    ctx.fillStyle=color;
+    rr(ctx,tx-tpad,ty-tpad,tw+tpad*2,th+tpad*2,6); ctx.fill();
+    ctx.fillStyle=(color==='#fff'||color==='#ffa502'||color==='#2ed573')?'#000':'#fff';
+  } else if(bgStyle==='outline'){
+    ctx.strokeStyle=color; ctx.lineWidth=1.5;
+    rr(ctx,tx-tpad,ty-tpad,tw+tpad*2,th+tpad*2,6); ctx.stroke();
+    ctx.fillStyle=(document.body.classList.contains('dark')?'#fff':'#222');
   } else {
-    ann.placed = true;
-    ann.x = bx + 20; ann.y = by + 20;
-    ann.arrowDx = -10; ann.arrowDy = -10;
-    drawAnnotation(ctx, ann, bx, by, bw, bh);
+    // No bg
+    ctx.fillStyle=(document.body.classList.contains('dark')?'#fff':'#222');
   }
+  ctx.fillText(a.text,tx,ty+th-tpad/2);
+  ctx.restore();
 }
 
-// ===== Controls (all use rAF-batched scheduleUpdate) =====
-['padding','borderRadius','shadowBlur','shadowOffset','shadowOpacity','scale'].forEach(id => {
-  document.getElementById(id).addEventListener('input', scheduleUpdate);
+// ===== Controls =====
+['padding','borderRadius','shadowBlur','shadowOffset','shadowOpacity','scale','annSize'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',schedule);
 });
-document.getElementById('blurIntensity').addEventListener('input', () => {
-  bgCacheKey = ''; // invalidate bg cache so blur re-renders
-  scheduleUpdate();
+['canvasW','canvasH'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',()=>{bgKey='';schedule();});
 });
-document.getElementById('bgColor').addEventListener('input', () => { bgCacheKey = ''; scheduleUpdate(); });
-document.getElementById('bgColor2').addEventListener('input', () => { bgCacheKey = ''; scheduleUpdate(); });
+['blurIntensity','bgColor','bgColor2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{bgKey='';schedule();});
+});
 
-// Background presets
-document.getElementById('bgPresets').addEventListener('click', e => {
-  if (!e.target.dataset.bg) return;
-  currentBg = e.target.dataset.bg;
-  document.querySelectorAll('#bgPresets .preset-btn').forEach(b => b.classList.remove('active'));
+document.getElementById('bgPresets').addEventListener('click',e=>{
+  if(!e.target.dataset.bg) return; currentBg=e.target.dataset.bg;
+  document.querySelectorAll('#bgPresets .preset-btn').forEach(b=>b.classList.remove('active'));
   e.target.classList.add('active');
-  document.getElementById('customBgRow').style.display = currentBg === 'custom' ? 'flex' : 'none';
-  document.getElementById('blurRow').style.display = currentBg === 'blur' ? 'flex' : 'none';
-  bgCacheKey = '';
-  scheduleUpdate();
+  document.getElementById('customBgRow').style.display=currentBg==='custom'?'flex':'none';
+  document.getElementById('blurRow').style.display=currentBg==='blur'?'flex':'none';
+  bgKey=''; schedule();
 });
 
-function selectFrame(name) {
-  currentFrame = name;
-  document.querySelectorAll('.frame-preset').forEach(b => b.classList.remove('active'));
+function selectFrame(name){
+  currentFrame=name;
+  document.querySelectorAll('.frame-preset').forEach(b=>b.classList.remove('active'));
   document.querySelector(`[data-frame="${name}"]`).classList.add('active');
-  scheduleUpdate();
+  schedule();
 }
 
-// ===== Annotations =====
-function addAnnotation() {
-  const text = document.getElementById('annText').value.trim();
-  if (!text) return;
-  annotations.push({ text, color: document.getElementById('annColor').value, placed: false });
-  document.getElementById('annText').value = '';
-  updateAnnotationList();
-  scheduleUpdate();
+function addAnnotation(){
+  const text=document.getElementById('annText').value.trim(); if(!text) return;
+  annotations.push({
+    text,color:document.getElementById('annColor').value,placed:false,
+    font:document.getElementById('annFont').value,
+    bgStyle:document.getElementById('annBgStyle').value
+  });
+  document.getElementById('annText').value='';
+  updateAnnList(); schedule();
 }
-function clearAnnotations() { annotations = []; updateAnnotationList(); scheduleUpdate(); }
-function updateAnnotationList() {
-  document.getElementById('annList').innerHTML = annotations.map((a, i) =>
-    `<div class="ann-item"><span style="color:${a.color}">● ${a.text}</span><button onclick="removeAnn(${i})">✕</button></div>`
-  ).join('');
+function clearAnnotations(){annotations=[];updateAnnList();schedule();}
+function updateAnnList(){
+  document.getElementById('annList').innerHTML=annotations.map((a,i)=>
+    `<div class="ann-item"><span style="color:${a.color}">● ${a.text}</span><button onclick="removeAnn(${i})">✕</button></div>`).join('');
 }
-function removeAnn(i) { annotations.splice(i, 1); updateAnnotationList(); scheduleUpdate(); }
+function removeAnn(i){annotations.splice(i,1);updateAnnList();schedule();}
 
 // ===== Export =====
-function exportPNG() { doExport(1); }
-function exportPNG2x() { doExport(2); }
+function exportPNG(){doExport(1);}
+function exportPNG2x(){doExport(2);}
+function doExport(expSc){
+  if(!img) return;
+  const pad=parseInt(document.getElementById('padding').value)||0;
+  const rad=parseInt(document.getElementById('borderRadius').value)||0;
+  const sBlur=parseInt(document.getElementById('shadowBlur').value)||0;
+  const sOff=parseInt(document.getElementById('shadowOffset').value)||0;
+  const sOp=parseInt(document.getElementById('shadowOpacity').value)/100;
+  const imgSc=(parseInt(document.getElementById('scale').value)/100)*expSc;
+  const annSize=(parseInt(document.getElementById('annSize').value)||16)*expSc;
 
-function doExport(expScale) {
-  if (!img) return;
-  const padding = parseInt(document.getElementById('padding').value) || 0;
-  const radius = parseInt(document.getElementById('borderRadius').value) || 0;
-  const shadowBlur = parseInt(document.getElementById('shadowBlur').value) || 0;
-  const shadowOffset = parseInt(document.getElementById('shadowOffset').value) || 0;
-  const shadowOpacity = parseInt(document.getElementById('shadowOpacity').value) / 100;
-  const imgScale = parseInt(document.getElementById('scale').value) / 100 * expScale;
+  const iw=Math.round(img.width*imgSc), ih=Math.round(img.height*imgSc);
+  const tw=iw+pad*2, th=ih+pad*2;
+  const fm=currentFrame!=='none'?16*expSc:0;
+  const fth=(currentFrame==='mac'||currentFrame==='browser')?34*expSc:0;
+  const cp=Math.max(sBlur*2*expSc+sOff*expSc+rad*expSc+fm,40);
+  const cw=Math.max(tw+cp*2,400), ch=Math.max(th+cp*2+fth,300);
 
-  const imgW = Math.round(img.width * imgScale);
-  const imgH = Math.round(img.height * imgScale);
-  const totalW = imgW + padding * 2;
-  const totalH = imgH + padding * 2;
+  const ec=document.createElement('canvas'); ec.width=cw; ec.height=ch;
+  const ctx=ec.getContext('2d');
 
-  const frameMargin = currentFrame !== 'none' ? 16 : 0;
-  const frameTitleH = (currentFrame === 'mac' || currentFrame === 'browser') ? 34 : 0;
-  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius + frameMargin, 40);
-  const cw = Math.max(totalW + canvasPadding * 2, 400);
-  const ch = Math.max(totalH + canvasPadding * 2 + frameTitleH, 300);
-
-  const expCanvas = document.createElement('canvas');
-  expCanvas.width = cw; expCanvas.height = ch;
-  const ctx = expCanvas.getContext('2d');
-
-  // Draw bg
-  if (currentBg === 'transparent') {
-    ctx.clearRect(0, 0, cw, ch);
-  } else if (currentBg === 'white') {
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'black') {
-    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient1') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'gradient2') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  } else if (currentBg === 'blur') {
-    const blurPx = parseInt(document.getElementById('blurIntensity')?.value) || 30;
-    const coverScale = Math.max(cw / img.width, ch / img.height);
-    ctx.filter = `blur(${blurPx}px)`;
-    ctx.drawImage(img, (cw - img.width * coverScale) / 2, (ch - img.height * coverScale) / 2, img.width * coverScale, img.height * coverScale);
-    ctx.filter = 'none';
-  } else if (currentBg === 'custom') {
-    const g = ctx.createLinearGradient(0, 0, cw, ch);
-    g.addColorStop(0, document.getElementById('bgColor')?.value || '#6366f1');
-    g.addColorStop(1, document.getElementById('bgColor2')?.value || '#8b5cf6');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  // bg
+  if(currentBg==='transparent') ctx.clearRect(0,0,cw,ch);
+  else if(currentBg==='white'){ctx.fillStyle='#fff';ctx.fillRect(0,0,cw,ch);}
+  else if(currentBg==='black'){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,cw,ch);}
+  else if(currentBg==='gradient1'||currentBg==='gradient2'){
+    const g=ctx.createLinearGradient(0,0,cw,ch);
+    g.addColorStop(0,currentBg==='gradient1'?'#667eea':'#f093fb');
+    g.addColorStop(1,currentBg==='gradient1'?'#764ba2':'#f5576c');
+    ctx.fillStyle=g;ctx.fillRect(0,0,cw,ch);
+  } else if(currentBg==='blur'){
+    const bp=parseInt(document.getElementById('blurIntensity')?.value)||30;
+    const cs=Math.max(cw/img.width,ch/img.height);
+    ctx.filter=`blur(${bp*expSc}px)`;ctx.drawImage(img,(cw-img.width*cs)/2,(ch-img.height*cs)/2,img.width*cs,img.height*cs);ctx.filter='none';
+  } else if(currentBg==='custom'){
+    const g=ctx.createLinearGradient(0,0,cw,ch);
+    g.addColorStop(0,document.getElementById('bgColor')?.value||'#6366f1');
+    g.addColorStop(1,document.getElementById('bgColor2')?.value||'#8b5cf6');
+    ctx.fillStyle=g;ctx.fillRect(0,0,cw,ch);
   }
 
-  const ix = (cw - totalW) / 2, iy = (ch - totalH) / 2 + frameTitleH / 2;
+  const ix=(cw-tw)/2, iy=(ch-th)/2+fth/2;
+  if(currentFrame!=='none') drawFrame(ctx,ix-fm,iy-fm-fth,tw+fm*2,th+fm*2+fth,rad*expSc);
 
-  // Frame bg
-  if (currentFrame !== 'none') drawFrameBg(ctx, ix, iy, totalW, totalH, radius);
+  ctx.save();ctx.shadowColor=`rgba(0,0,0,${sOp})`;ctx.shadowBlur=sBlur*expSc;ctx.shadowOffsetX=0;ctx.shadowOffsetY=sOff*expSc;
+  ctx.fillStyle='#fff';rr(ctx,ix,iy,tw,th,rad*expSc);ctx.fill();ctx.restore();
+  ctx.save();rr(ctx,ix+pad,iy+pad,iw,ih,Math.max(0,rad*expSc-pad));ctx.clip();ctx.drawImage(img,ix+pad,iy+pad,iw,ih);ctx.restore();
 
-  // Shadow + image
-  ctx.save();
-  ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
-  ctx.shadowBlur = shadowBlur;
-  ctx.shadowOffsetX = 0; ctx.shadowOffsetY = shadowOffset;
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath(); roundRectPath(ctx, ix, iy, totalW, totalH, radius);
-  ctx.fill();
-  ctx.restore();
+  annotations.forEach(a=>{
+    // Scale annotation coordinates for export
+    const ea={...a,x:a.x*expSc,y:a.y*expSc,arrowDx:a.arrowDx*expSc,arrowDy:a.arrowDy*expSc,placed:true};
+    drawAnnotation(ctx,ea,ix,iy,tw,th,annSize);
+  });
 
-  ctx.save();
-  ctx.beginPath(); roundRectPath(ctx, ix + padding, iy + padding, imgW, imgH, Math.max(0, radius - padding));
-  ctx.clip();
-  ctx.drawImage(img, ix + padding, iy + padding, imgW, imgH);
-  ctx.restore();
-
-  // Frame decorations
-  if (currentFrame !== 'none') drawFrameDecorations(ctx, ix, iy, totalW, totalH, radius);
-  annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
-
-  expCanvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `screenshot-beautified-${expScale}x.png`;
-    a.click(); URL.revokeObjectURL(url);
-  }, 'image/png');
+  ec.toBlob(blob=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`screenshot-${expSc}x.png`;a.click();URL.revokeObjectURL(url);},'image/png');
 }
 
-// ===== Theme =====
-function toggleTheme() { document.body.classList.toggle('dark'); }
+function toggleTheme(){document.body.classList.toggle('dark');}
 </script>
 </body>
 </html>
