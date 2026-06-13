@@ -82,11 +82,17 @@ input[type=text] { flex: 1; padding: 5px 8px; border: 1px solid var(--border); b
         <button class="preset-btn" data-bg="black">黑色</button>
         <button class="preset-btn" data-bg="gradient1">紫蓝渐变</button>
         <button class="preset-btn" data-bg="gradient2">日落渐变</button>
-        <button class="preset-btn" data-bg="custom">自定义</button>
+        <button class="preset-btn" data-bg="blur">高斯模糊 🔥</button>
+        <button class="preset-btn" data-bg="custom">自定义渐变</button>
       </div>
       <div class="ctrl-row" id="customBgRow" style="display:none">
         <label>颜色</label><input type="color" id="bgColor" value="#6366f1">
         <label>渐变2</label><input type="color" id="bgColor2" value="#8b5cf6">
+      </div>
+      <div class="ctrl-row" id="blurRow" style="display:none">
+        <label>模糊度</label>
+        <input type="range" id="blurIntensity" min="5" max="80" value="30" oninput="updatePreview()">
+        <span style="font-size:0.75rem;min-width:28px" id="blurIntensityVal">30</span>
       </div>
       <div class="ctrl-row">
         <label>内边距</label>
@@ -288,6 +294,18 @@ function updatePreview() {
     const g = ctx.createLinearGradient(0, 0, cw, ch);
     g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
     ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'blur') {
+    // Scale original image to cover canvas, then blur
+    const blurPx = parseInt(document.getElementById('blurIntensity').value) || 30;
+    document.getElementById('blurIntensityVal').textContent = blurPx;
+    const coverScale = Math.max(cw / img.width, ch / img.height);
+    const bw = img.width * coverScale;
+    const bh = img.height * coverScale;
+    const bx = (cw - bw) / 2;
+    const by = (ch - bh) / 2;
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(img, bx, by, bw, bh);
+    ctx.filter = 'none';
   } else if (currentBg === 'custom') {
     const c1 = document.getElementById('bgColor').value;
     const c2 = document.getElementById('bgColor2').value;
@@ -447,6 +465,7 @@ document.getElementById('bgPresets').addEventListener('click', e => {
   document.querySelectorAll('#bgPresets .preset-btn').forEach(b => b.classList.remove('active'));
   e.target.classList.add('active');
   document.getElementById('customBgRow').style.display = currentBg === 'custom' ? 'flex' : 'none';
+  document.getElementById('blurRow').style.display = currentBg === 'blur' ? 'flex' : 'none';
   updatePreview();
 });
 
@@ -531,6 +550,16 @@ function doExport(scale) {
     const g = ctx.createLinearGradient(0, 0, cw, ch);
     g.addColorStop(0, '#f093fb'); g.addColorStop(1, '#f5576c');
     ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  } else if (currentBg === 'blur') {
+    const blurPx = parseInt(document.getElementById('blurIntensity')?.value) || 30;
+    const coverScale = Math.max(cw / img.width, ch / img.height);
+    const bw = img.width * coverScale;
+    const bh = img.height * coverScale;
+    const bx = (cw - bw) / 2;
+    const by = (ch - bh) / 2;
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(img, bx, by, bw, bh);
+    ctx.filter = 'none';
   } else if (currentBg === 'custom') {
     const c1 = document.getElementById('bgColor')?.value || '#6366f1';
     const c2 = document.getElementById('bgColor2')?.value || '#8b5cf6';
