@@ -346,9 +346,13 @@ function doRender() {
   const totalW = imgW + padding * 2;
   const totalH = imgH + padding * 2;
 
-  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
-  const cw = Math.max(totalW + canvasPadding, 400);
-  const ch = Math.max(totalH + canvasPadding, 300);
+  // Extra space for device frame
+  const frameMargin = currentFrame !== 'none' ? 16 : 0;
+  const frameTitleH = (currentFrame === 'mac' || currentFrame === 'browser') ? 34 : 0;
+
+  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius + frameMargin, 40);
+  const cw = Math.max(totalW + canvasPadding * 2, 400);
+  const ch = Math.max(totalH + canvasPadding * 2 + frameTitleH, 300);
 
   // Only resize canvas if dimensions changed (resize is expensive)
   if (mainCanvas.width !== cw || mainCanvas.height !== ch) {
@@ -367,12 +371,18 @@ function doRender() {
   ctx.clearRect(0, 0, cw, ch);
   ctx.drawImage(bgCache, 0, 0);
 
-  // 2. Shadow rect + image
+  // Image position (centered, shifted down for frame title bar)
   const ix = (cw - totalW) / 2;
-  const iy = (ch - totalH) / 2;
+  const iy = (ch - totalH) / 2 + frameTitleH / 2;
   const iwx = ix + padding;
   const iwy = iy + padding;
 
+  // 2. Device frame background (drawn under image)
+  if (currentFrame !== 'none') {
+    drawFrameBg(ctx, ix, iy, totalW, totalH, radius);
+  }
+
+  // 3. Shadow rect + image (drawn on top of frame bg)
   ctx.save();
   ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
   ctx.shadowBlur = shadowBlur;
@@ -390,43 +400,65 @@ function doRender() {
   ctx.drawImage(img, iwx, iwy, imgW, imgH);
   ctx.restore();
 
-  // 3. Device frame
+  // 4. Device frame decorations (drawn on top of image)
   if (currentFrame !== 'none') {
-    drawFrame(ctx, ix, iy, totalW, totalH, radius);
+    drawFrameDecorations(ctx, ix, iy, totalW, totalH, radius);
   }
 
-  // 4. Annotations
+  // 5. Annotations
   annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
 }
 
-function drawFrame(ctx, x, y, w, h, r) {
+function drawFrameBg(ctx, x, y, w, h, r) {
   ctx.save();
-  const fw = 12;
-  const fx = x - fw, fy = y - fw - 30, fw2 = w + fw * 2, fh2 = h + fw * 2 + 30;
+  const fw = 16;
+
+  if (currentFrame === 'mac' || currentFrame === 'browser') {
+    const fx = x - fw, fy = y - fw - 34, fw2 = w + fw * 2, fh2 = h + fw * 2 + 34;
+    // Frame shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 8;
+    ctx.fillStyle = currentFrame === 'mac' ? '#2c2c2e' : '#e8e8ea';
+    ctx.strokeStyle = currentFrame === 'mac' ? '#555' : '#ccc';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 8);
+    ctx.fill(); ctx.stroke();
+    // Reset shadow
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  } else if (currentFrame === 'iphone') {
+    const fx = x - fw, fy = y - fw, fw2 = w + fw * 2, fh2 = h + fw * 2;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 8;
+    ctx.fillStyle = '#1c1c1e';
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 3;
+    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 20);
+    ctx.fill(); ctx.stroke();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  }
+  ctx.restore();
+}
+
+function drawFrameDecorations(ctx, x, y, w, h, r) {
+  ctx.save();
+  const fw = 16;
 
   if (currentFrame === 'mac') {
-    ctx.fillStyle = '#2c2c2e'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 18, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 38, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 58, fy + 15, 6, 0, Math.PI * 2); ctx.fill();
+    const fx = x - fw, fy = y - fw - 34;
+    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 22, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 44, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 66, fy + 17, 7, 0, Math.PI * 2); ctx.fill();
   } else if (currentFrame === 'iphone') {
-    ctx.fillStyle = '#1c1c1e'; ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
-    ctx.beginPath(); roundRectPath(ctx, fx - 4, fy - 12, fw2 + 8, fh2 + 24, r + 20);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#333'; ctx.beginPath();
-    roundRectPath(ctx, (fx + fw2 / 2) - 40, fy - 12, 80, 8, 4);
+    const fx = x - fw, fy = y - fw, fw2 = w + fw * 2;
+    // Dynamic Island notch
+    ctx.fillStyle = '#1c1c1e';
+    ctx.beginPath(); roundRectPath(ctx, fx + fw2 / 2 - 50, fy - 4, 100, 26, 13);
     ctx.fill();
   } else if (currentFrame === 'browser') {
-    ctx.fillStyle = '#e8e8ea'; ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(ctx, fx, fy, fw2, fh2, r + 6);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 16, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 32, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 48, fy + 15, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ddd';
-    ctx.beginPath(); roundRectPath(ctx, fx + 70, fy + 8, fw2 - 140, 14, 4);
+    const fx = x - fw, fy = y - fw - 34, fw2 = w + fw * 2;
+    ctx.fillStyle = '#ff5f57'; ctx.beginPath(); ctx.arc(fx + 20, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#febc2e'; ctx.beginPath(); ctx.arc(fx + 38, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#28c840'; ctx.beginPath(); ctx.arc(fx + 56, fy + 17, 6, 0, Math.PI * 2); ctx.fill();
+    // URL bar
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+    ctx.beginPath(); roundRectPath(ctx, fx + 80, fy + 10, fw2 - 160, 14, 5);
     ctx.fill(); ctx.stroke();
   }
   ctx.restore();
@@ -521,14 +553,18 @@ function doExport(expScale) {
   const imgH = Math.round(img.height * imgScale);
   const totalW = imgW + padding * 2;
   const totalH = imgH + padding * 2;
-  const cw = totalW + Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
-  const ch = totalH + Math.max(shadowBlur * 2 + shadowOffset + radius, 40);
+
+  const frameMargin = currentFrame !== 'none' ? 16 : 0;
+  const frameTitleH = (currentFrame === 'mac' || currentFrame === 'browser') ? 34 : 0;
+  const canvasPadding = Math.max(shadowBlur * 2 + shadowOffset + radius + frameMargin, 40);
+  const cw = Math.max(totalW + canvasPadding * 2, 400);
+  const ch = Math.max(totalH + canvasPadding * 2 + frameTitleH, 300);
 
   const expCanvas = document.createElement('canvas');
   expCanvas.width = cw; expCanvas.height = ch;
   const ctx = expCanvas.getContext('2d');
 
-  // Draw bg (same logic as updateBgCache but at export size)
+  // Draw bg
   if (currentBg === 'transparent') {
     ctx.clearRect(0, 0, cw, ch);
   } else if (currentBg === 'white') {
@@ -556,8 +592,12 @@ function doExport(expScale) {
     ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
   }
 
-  const ix = (cw - totalW) / 2, iy = (ch - totalH) / 2;
+  const ix = (cw - totalW) / 2, iy = (ch - totalH) / 2 + frameTitleH / 2;
 
+  // Frame bg
+  if (currentFrame !== 'none') drawFrameBg(ctx, ix, iy, totalW, totalH, radius);
+
+  // Shadow + image
   ctx.save();
   ctx.shadowColor = `rgba(0,0,0,${shadowOpacity})`;
   ctx.shadowBlur = shadowBlur;
@@ -573,7 +613,8 @@ function doExport(expScale) {
   ctx.drawImage(img, ix + padding, iy + padding, imgW, imgH);
   ctx.restore();
 
-  if (currentFrame !== 'none') drawFrame(ctx, ix, iy, totalW, totalH, radius);
+  // Frame decorations
+  if (currentFrame !== 'none') drawFrameDecorations(ctx, ix, iy, totalW, totalH, radius);
   annotations.forEach(ann => drawAnnotation(ctx, ann, ix, iy, totalW, totalH));
 
   expCanvas.toBlob(blob => {
