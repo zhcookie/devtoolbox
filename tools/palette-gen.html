@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>配色方案在线生成_调色板颜色搭配 | DevTools</title>
+<meta name="description" content="免费在线调色板生成器，随机生成和谐配色方案，一键复制色值，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+<style>.color-chip { width:100%;height:60px;border-radius:8px;cursor:pointer;transition:transform 0.2s;position:relative } .color-chip:hover { transform:scale(1.03) } .color-chip::after { content:attr(data-hex);position:absolute;bottom:6px;left:8px;font-family:monospace;font-size:0.78rem;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.2s } .color-chip:hover::after { opacity:1 } .palette-row { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0 } @media(max-width:600px){.palette-row{grid-template-columns:repeat(3,1fr)}}</style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 调色板生成器</div>
+    <div class="tool-header"><h2>🎨 调色板生成器</h2><p>随机生成和谐配色方案 — 点击色块复制色值</p></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="genAnalogous()">🌈 近似色</button>
+      <button class="btn" onclick="genComplementary()">🔄 互补色</button>
+      <button class="btn" onclick="genTriadic()">🔺 三色</button>
+      <button class="btn" onclick="genMono()">🎯 单色系</button>
+      <button class="btn" onclick="genRandom()">🎲 随机</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div id="palettes"></div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => { const k = (n + h / 30) % 12; return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1); };
+  return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+
+function render(colors) {
+  let html = '<div class="palette-row">';
+  colors.forEach(c => html += `<div class="color-chip" data-hex="${c}" style="background:${c}" onclick="copyColor('${c}')"></div>`);
+  html += '</div><div style="display:flex;gap:8px;justify-content:center;font-family:monospace;font-size:0.85rem;margin-top:4px">';
+  colors.forEach(c => html += `<button class="btn btn-sm" onclick="copyColor('${c}')">${c}</button>`);
+  html += '</div>';
+  document.getElementById('palettes').innerHTML = html;
+}
+function copyColor(hex) { copyText(hex); }
+
+function genAnalogous() {
+  const h = Math.floor(Math.random() * 360);
+  render([hslToHex(h,70,55), hslToHex((h+30)%360,70,55), hslToHex((h+60)%360,70,55), hslToHex((h+90)%360,70,55), hslToHex((h+120)%360,70,55)]);
+}
+function genComplementary() {
+  const h = Math.floor(Math.random() * 360);
+  render([hslToHex(h,75,55), hslToHex(h,50,70), hslToHex((h+180)%360,75,55), hslToHex((h+180)%360,50,70), hslToHex(h,30,90)]);
+}
+function genTriadic() {
+  const h = Math.floor(Math.random() * 360);
+  render([hslToHex(h,75,55), hslToHex((h+120)%360,75,55), hslToHex((h+240)%360,75,55), hslToHex(h,30,85), hslToHex((h+120)%360,30,85)]);
+}
+function genMono() {
+  const h = Math.floor(Math.random() * 360);
+  render([hslToHex(h,60,25), hslToHex(h,65,40), hslToHex(h,70,55), hslToHex(h,50,75), hslToHex(h,30,92)]);
+}
+function genRandom() { [genAnalogous, genComplementary, genTriadic, genMono][Math.floor(Math.random()*4)](); }
+
+genAnalogous();
+</script>
+</body>
+</html>

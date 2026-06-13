@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>表情包在线生成器_Meme制作加文字 | DevTools</title>
+<meta name="description" content="免费在线表情包生成器，上传图片加文字，制作你的专属Meme，纯浏览器端，图片不上传。">
+<link rel="stylesheet" href="../style.css">
+<style>#canvas-wrap{text-align:center;padding:10px}#canvas-wrap canvas{max-width:100%;border:1px solid var(--border);border-radius:var(--radius-sm)}</style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 表情包生成器</div>
+    <div class="tool-header"><h2>🤣 表情包生成器</h2><p>上传图片 + 加文字 = 专属表情包 — 图片不上传</p></div>
+    <div class="drop-zone" id="dropZone" style="margin:8px 0" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">📁</div>
+      <div>拖拽图片到此处，或点击选择（建议 1:1 方形图片）</div>
+      <input type="file" id="fileInput" accept="image/*" onchange="loadImage()" style="display:none">
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;align-items:end">
+      <div><label style="font-size:0.82rem;display:block">顶部文字</label><input type="text" id="topText" placeholder="ONE DOES NOT SIMPLY" oninput="renderMeme()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);width:200px;font-family:inherit"></div>
+      <div><label style="font-size:0.82rem;display:block">底部文字</label><input type="text" id="bottomText" placeholder="WRITE CODE WITHOUT BUGS" oninput="renderMeme()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);width:200px;font-family:inherit"></div>
+      <div><label style="font-size:0.82rem;display:block">字号</label><input type="range" id="fontSize" min="20" max="80" value="40" oninput="renderMeme()" style="width:120px"></div>
+      <button class="btn btn-primary" onclick="downloadMeme()">💾 下载</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div id="canvas-wrap"><p style="color:var(--text-secondary);padding:40px">👆 上传一张图片开始制作</p></div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>setupDropZone();function setupDropZone(){const dz=document.getElementById("dropZone");if(!dz)return;const fi=document.getElementById("fileInput");dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("drag-over")});dz.addEventListener("dragleave",()=>{dz.classList.remove("drag-over")});dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag-over");if(e.dataTransfer.files.length){fi.files=e.dataTransfer.files;loadImage()}})}</script>
+<script>
+let imgObj = null;
+function loadImage() {
+  const file = document.getElementById('fileInput').files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { imgObj = new Image(); imgObj.onload = renderMeme; imgObj.src = e.target.result; };
+  reader.readAsDataURL(file);
+}
+function renderMeme() {
+  if(!imgObj) return;
+  const wrap = document.getElementById('canvas-wrap');
+  const canvas = document.createElement('canvas');
+  const w = 600, h = 600;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // Fill white
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+  // Draw image (fit inside)
+  const scale = Math.min(w/imgObj.width, h/imgObj.height);
+  const iw = imgObj.width*scale, ih = imgObj.height*scale;
+  ctx.drawImage(imgObj, (w-iw)/2, (h-ih)/2, iw, ih);
+  // Text
+  const fontSize = parseInt(document.getElementById('fontSize').value);
+  ctx.font = `bold ${fontSize}px Impact, "PingFang SC", "Microsoft YaHei", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.lineWidth = fontSize/8;
+  ctx.strokeStyle = '#000';
+  ctx.fillStyle = '#fff';
+  const topText = document.getElementById('topText').value.toUpperCase();
+  const bottomText = document.getElementById('bottomText').value.toUpperCase();
+  if(topText) { ctx.strokeText(topText, w/2, fontSize+10); ctx.fillText(topText, w/2, fontSize+10); }
+  if(bottomText) { ctx.strokeText(bottomText, w/2, h-16); ctx.fillText(bottomText, w/2, h-16); }
+  wrap.innerHTML = ''; wrap.appendChild(canvas);
+}
+function downloadMeme() {
+  const c = document.querySelector('#canvas-wrap canvas');
+  if(!c) return;
+  const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'meme.png'; a.click();
+}
+</script>
+</body>
+</html>

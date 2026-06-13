@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV转JSON在线工具_表格数据转换 | DevTools</title>
+<meta name="description" content="免费在线CSV与JSON互转工具，CSV转JSON、JSON转CSV，全部浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / CSV ⇄ JSON</div>
+    <div class="tool-header"><h2>📊 CSV ⇄ JSON</h2><p>CSV 与 JSON 格式相互转换 — 全浏览器端</p></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="csvToJSON()">📊 CSV → JSON</button>
+      <button class="btn" onclick="jsonToCSV()">📋 JSON → CSV</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制结果</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel"><div class="tool-panel-header"><span>📥 输入</span></div><textarea id="input" placeholder="粘贴 CSV 或 JSON 数据..." style="min-height:300px"></textarea></div>
+      <div class="tool-panel"><div class="tool-panel-header"><span>📤 输出</span></div><div class="output-area" id="output" style="min-height:300px"></div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function csvToJSON() {
+  const csv = document.getElementById('input').value.trim();
+  if (!csv) return;
+  const lines = csv.split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    const obj = {};
+    const vals = parseCSVLine(lines[i]);
+    headers.forEach((h, j) => obj[h] = vals[j]?.trim() || '');
+    result.push(obj);
+  }
+  document.getElementById('output').textContent = JSON.stringify(result, null, 2);
+  showToast('转换完成 ✓');
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '', inQuotes = false;
+  for (let c of line) {
+    if (c === '"') { inQuotes = !inQuotes; continue; }
+    if (c === ',' && !inQuotes) { result.push(current); current = ''; continue; }
+    current += c;
+  }
+  result.push(current);
+  return result;
+}
+
+function jsonToCSV() {
+  try {
+    const arr = JSON.parse(document.getElementById('input').value.trim());
+    if (!Array.isArray(arr)) throw new Error('必须是 JSON 数组');
+    if (!arr.length) { document.getElementById('output').textContent = ''; return; }
+    const headers = Object.keys(arr[0]);
+    let csv = headers.join(',') + '\n';
+    arr.forEach(obj => csv += headers.map(h => {
+      const v = String(obj[h] ?? '');
+      return v.includes(',') || v.includes('"') ? '"' + v.replace(/"/g,'""') + '"' : v;
+    }).join(',') + '\n');
+    document.getElementById('output').textContent = csv;
+    showToast('转换完成 ✓');
+  } catch(e) { document.getElementById('output').textContent = '错误：' + e.message; }
+}
+
+function clearAll() { document.getElementById('input').value=''; document.getElementById('output').textContent=''; }
+function copyOutput() { copyText(document.getElementById('output').textContent); }
+
+document.getElementById('input').value = 'name,age,city\n张三,25,北京\n李四,30,上海';
+csvToJSON();
+</script>
+</body>
+</html>

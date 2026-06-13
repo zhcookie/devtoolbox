@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二维码在线生成器_QRCode生成下载 | DevTools</title>
+<meta name="description" content="免费在线二维码生成器，支持自定义颜色、大小，纯浏览器端生成，数据不上传。">
+<link rel="stylesheet" href="../style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>#qrcode { display:flex;justify-content:center;align-items:center;min-height:280px;padding:20px } #qrcode canvas,#qrcode img { max-width:100%;height:auto }</style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 二维码生成器</div>
+    <div class="tool-header"><h2>📱 二维码生成器</h2><p>输入文本或链接，生成二维码 — 全在浏览器端完成</p></div>
+    <div class="tool-panel" style="padding:20px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="input" placeholder="输入网址或文本..." value="https://devtoolbox-53g.pages.dev" style="flex:1;min-width:200px;padding:10px 14px;border:2px solid var(--border);border-radius:50px;font-size:0.95rem;background:var(--bg-input);color:var(--text);outline:none" oninput="genQR()">
+        <input type="color" id="fg" value="#000000" onchange="genQR()" title="前景色">
+        <input type="color" id="bg" value="#ffffff" onchange="genQR()" title="背景色">
+        <select id="size" onchange="genQR()" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)"><option value="200">小</option><option value="300" selected>中</option><option value="400">大</option></select>
+      </div>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-panel"><div id="qrcode"></div></div>
+    <div class="btn-group" style="justify-content:center"><button class="btn btn-primary" onclick="downloadQR()">💾 下载 PNG</button><button class="btn" onclick="copyQR()">📋 复制图片</button></div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const qrcodeDiv = document.getElementById('qrcode');
+function genQR() {
+  const text = document.getElementById('input').value.trim() || ' ';
+  const size = parseInt(document.getElementById('size').value);
+  const fg = document.getElementById('fg').value;
+  const bg = document.getElementById('bg').value;
+  qrcodeDiv.innerHTML = '';
+  QRCode.toCanvas(text, { width: size, color: { dark: fg, light: bg } }, (err, canvas) => {
+    if (err) { qrcodeDiv.innerHTML = '<span style="color:var(--danger)">生成失败</span>'; return; }
+    qrcodeDiv.appendChild(canvas);
+  });
+}
+function downloadQR() {
+  const c = qrcodeDiv.querySelector('canvas');
+  if (!c) return;
+  const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'qrcode.png'; a.click();
+}
+async function copyQR() {
+  const c = qrcodeDiv.querySelector('canvas');
+  if (!c) return;
+  c.toBlob(async b => { await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); showToast('已复制 ✓'); });
+}
+genQR();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unicode在线转换_中文转Unicode编码 | DevTools</title>
+<meta name="description" content="免费在线Unicode转换工具，支持Unicode编码与中文文本相互转换，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / Unicode 转换</div>
+    <div class="tool-header">
+      <h2>🌐 Unicode 转换</h2>
+      <p>Unicode 与中文文本相互转换 — 全在浏览器端完成</p>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="toUnicode()">→ Unicode 编码</button>
+      <button class="btn" onclick="toText()">→ 转中文</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制结果</button>
+    </div>
+
+    <div class="ad-slot horizontal">📢 广告位</div>
+
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 输入</span></div>
+        <textarea id="input" placeholder="输入中文文本或 \\uXXXX 格式的 Unicode..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📤 输出</span></div>
+        <div class="output-area" id="output"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+
+function toUnicode() {
+  let result = '';
+  for (let c of input.value) {
+    result += '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0');
+  }
+  output.textContent = result;
+}
+
+function toText() {
+  try {
+    output.textContent = input.value.replace(/\\u[\da-fA-F]{4}/g, m => String.fromCharCode(parseInt(m.slice(2), 16)));
+  } catch(e) {
+    output.textContent = '转换失败：' + e.message;
+  }
+}
+
+function clearAll() { input.value = ''; output.textContent = ''; }
+function copyOutput() { copyText(output.textContent); }
+</script>
+</body>
+</html>

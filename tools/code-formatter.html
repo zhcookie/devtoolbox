@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代码在线格式化_HTMLCSSJSSQL美化压缩 | DevTools</title>
+<meta name="description" content="免费在线代码格式化工具，支持HTML/CSS/JavaScript/SQL代码美化和压缩，纯浏览器端。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 代码格式化</div>
+    <div class="tool-header"><h2>💻 代码格式化/压缩</h2><p>HTML / CSS / JavaScript / SQL 美化与压缩 — 纯浏览器端</p></div>
+    <div class="btn-group">
+      <select id="lang" onchange="updatePlaceholder()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)">
+        <option value="js">JavaScript</option><option value="css">CSS</option><option value="html">HTML</option><option value="sql">SQL</option>
+      </select>
+      <button class="btn btn-primary" onclick="beautify()">✨ 美化</button>
+      <button class="btn" onclick="minify()">🗜️ 压缩</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel"><div class="tool-panel-header">📥 输入</div><textarea id="input" placeholder="粘贴代码..." style="min-height:350px" oninput="autoFormat()"></textarea></div>
+      <div class="tool-panel"><div class="tool-panel-header">📤 输出</div><div class="output-area" id="output" style="min-height:350px"></div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const langEl = document.getElementById('lang');
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+let lastInput = '';
+let debounceTimer;
+
+function autoFormat() { clearTimeout(debounceTimer); debounceTimer = setTimeout(beautify, 800); }
+
+function beautify() {
+  const lang = langEl.value;
+  const code = input.value.trim();
+  if (!code) return;
+  try {
+    let result = code;
+    if (lang === 'js') result = beautifyJS(code);
+    else if (lang === 'css') result = beautifyCSS(code);
+    else if (lang === 'html') result = beautifyHTML(code);
+    else if (lang === 'sql') result = beautifySQL(code);
+    output.textContent = result;
+  } catch(e) { output.textContent = '格式化错误：' + e.message; }
+}
+
+function minify() {
+  const lang = langEl.value;
+  const code = input.value.trim();
+  let result = code;
+  if (lang === 'js') result = code.replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{}();,:])\s*/g,'$1').trim();
+  else if (lang === 'css') result = code.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{};:,>+~])\s*/g,'$1').trim();
+  else if (lang === 'html') result = code.replace(/<!--[\s\S]*?-->/g,'').replace(/>\s+</g,'><').replace(/\s+/g,' ').trim();
+  else if (lang === 'sql') result = code.replace(/--.*$/gm,'').replace(/\s+/g,' ').replace(/\s*([(),;])\s*/g,'$1').trim();
+  output.textContent = result;
+}
+
+function beautifyJS(code) {
+  let indent = 0, result = '';
+  code = code.replace(/\s+/g,' ').replace(/\s*([{}();,:])\s*/g,'$1').trim();
+  for (let i = 0; i < code.length; i++) {
+    const c = code[i];
+    if ('{[('.includes(c)) { result += (i>0&&code[i-1]!=='\n'&&'([{'.indexOf(code[i-1])<0?' ':''); result += c + '\n'; indent++; result += '  '.repeat(indent); }
+    else if ('])}'.includes(c)) { indent = Math.max(0, indent - 1); result += '\n' + '  '.repeat(indent) + c; }
+    else if (c === ';') { result += ';\n' + '  '.repeat(indent); }
+    else if (c === ',') { result += ', '; if (i+1<code.length) i++; while(i+1<code.length&&code[i+1]===' ')i++ }
+    else { result += c; }
+  }
+  return result;
+}
+
+function beautifyCSS(code) {
+  return code.replace(/\s*{\s*/g,' {\n  ').replace(/\s*;\s*/g,';\n  ').replace(/\s*}\s*/g,'\n}\n').replace(/\n\s+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+
+function beautifyHTML(code) {
+  let indent = 0, result = '';
+  code = code.replace(/>\s+</g,'><').replace(/\s+/g,' ').replace(/\s*<\//g,'</').trim();
+  const tokens = code.split(/(<[^>]+>)/g).filter(Boolean);
+  tokens.forEach(t => {
+    if (t.startsWith('</')) { indent = Math.max(0, indent - 1); result += '\n' + '  '.repeat(indent) + t; }
+    else if (t.startsWith('<') && !t.includes('/>') && !['<br','<hr','<img','<input','<meta','<link'].some(s => t.startsWith(s))) {
+      result += '\n' + '  '.repeat(indent) + t; if (!['<script','<style'].some(s => t.startsWith(s))) indent++;
+    } else { result += t; }
+  });
+  return result.trim();
+}
+
+function beautifySQL(code) {
+  const keywords = ['SELECT','FROM','WHERE','AND','OR','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','ON','ORDER BY','GROUP BY','HAVING','LIMIT','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE'];
+  let result = code.replace(/\s+/g,' ').trim();
+  keywords.forEach(k => { result = result.replace(new RegExp('\\b'+k+'\\b','gi'), '\n'+k); });
+  return result.replace(/\n+/g,'\n').trim();
+}
+
+function clearAll() { input.value = ''; output.textContent = ''; }
+function copyOutput() { copyText(output.textContent); }
+function updatePlaceholder() {
+  const m = {js:'console.log("Hello")',css:'body {\n  color: red;\n}',html:'<div class="box">\n  <p>Hello</p>\n</div>',sql:'SELECT * FROM users WHERE age > 18'};
+  input.value = m[langEl.value] || '';
+  beautify();
+}
+updatePlaceholder();
+</script>
+</body>
+</html>

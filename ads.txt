@@ -1,0 +1,3 @@
+# Google AdSense ads.txt
+# 申请通过后，将 AdSense 提供的代码替换下面这行
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL在线编码解码_URL参数转义 | DevTools</title>
+<meta name="description" content="免费在线URL编解码工具，支持URL参数编码(encodeURIComponent)和解码(decodeURIComponent)，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / URL 编解码</div>
+    <div class="tool-header">
+      <h2>🔗 URL 编解码</h2>
+      <p>网址参数编码与解码转换 — 全在浏览器端完成</p>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="urlEncode()">🔒 URL 编码</button>
+      <button class="btn" onclick="urlDecode()">🔓 URL 解码</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制结果</button>
+    </div>
+
+    <div class="ad-slot horizontal">📢 广告位</div>
+
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 输入</span></div>
+        <textarea id="input" placeholder="输入要编码/解码的文本..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📤 输出</span></div>
+        <div class="output-area" id="output"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+
+function urlEncode() { output.textContent = encodeURIComponent(input.value); }
+function urlDecode() {
+  try { output.textContent = decodeURIComponent(input.value.trim()); }
+  catch(e) { output.textContent = '解码失败：' + e.message; }
+}
+function clearAll() { input.value = ''; output.textContent = ''; }
+function copyOutput() { copyText(output.textContent); }
+
+input.value = 'https://example.com?name=张三&type=测试';
+urlEncode();
+</script>
+</body>
+</html>

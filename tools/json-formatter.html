@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON格式化在线工具_JSON美化压缩校验 | DevTools</title>
+<meta name="description" content="免费在线JSON格式化工具，支持JSON美化、压缩、语法校验，数据不上传服务器，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / JSON 格式化</div>
+    <div class="tool-header">
+      <h2>📋 JSON 格式化</h2>
+      <p>格式化、压缩、校验 JSON 数据 — 全在浏览器端完成</p>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="formatJSON()">✨ 格式化</button>
+      <button class="btn" onclick="compressJSON()">🗜️ 压缩</button>
+      <button class="btn" onclick="validateJSON()">✅ 校验</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制结果</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 输入 JSON</span></div>
+        <textarea id="input" placeholder='粘贴 JSON 数据'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📤 输出</span><span id="status" style="font-size:0.78rem"></span></div>
+        <div class="output-area" id="output" style="min-height:300px;padding:14px;font-family:monospace"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const status = document.getElementById('status');
+function formatJSON() {
+  try { const obj = JSON.parse(input.value.trim() || '{}'); output.textContent = JSON.stringify(obj, null, 2); output.style.color = ''; status.textContent = '✅ 有效'; status.style.color = 'var(--success)'; }
+  catch(e) { output.textContent = 'JSON 解析错误：' + e.message; output.style.color = 'var(--danger)'; status.textContent = '❌ 无效'; status.style.color = 'var(--danger)'; }
+}
+function compressJSON() {
+  try { const obj = JSON.parse(input.value.trim() || '{}'); output.textContent = JSON.stringify(obj); output.style.color = ''; status.textContent = '✅ 已压缩'; status.style.color = 'var(--success)'; }
+  catch(e) { output.textContent = 'JSON 解析错误：' + e.message; output.style.color = 'var(--danger)'; }
+}
+function validateJSON() {
+  try { JSON.parse(input.value.trim() || '{}'); output.textContent = '✅ JSON 格式有效！\n\n' + JSON.stringify(JSON.parse(input.value.trim()), null, 2); output.style.color = ''; status.textContent = '✅ 有效'; status.style.color = 'var(--success)'; }
+  catch(e) { output.textContent = '❌ JSON 格式无效\n\n' + e.message; output.style.color = 'var(--danger)'; status.textContent = '❌ 无效'; status.style.color = 'var(--danger)'; }
+}
+function clearAll() { input.value = ''; output.textContent = ''; status.textContent = ''; }
+function copyOutput() { copyText(output.textContent); }
+input.value = '{"name":"张三","age":25,"skills":["Python","JavaScript"],"active":true}';
+formatJSON();
+</script>
+</body>
+</html>

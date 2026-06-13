@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片转ASCII字符画在线_照片转文字 | DevTools</title>
+<meta name="description" content="免费在线ASCII艺术画生成器，上传图片转为字符画，可调对比度和亮度，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+<style>#ascii-out{font-family:monospace;font-size:4px;line-height:1;white-space:pre;overflow-x:auto;padding:14px;min-height:200px;background:var(--bg-input);border-radius:var(--radius-sm)}</style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / ASCII 艺术画</div>
+    <div class="tool-header"><h2>🎭 ASCII 艺术画</h2><p>图片转字符画 — 图片不上传，全浏览器端</p></div>
+    <div class="drop-zone" id="dropZone" style="margin:8px 0" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">📁</div>
+      <div>拖拽图片到此处，或点击选择</div>
+      <input type="file" id="fileInput" accept="image/*" onchange="loadImage()" style="display:none">
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;align-items:end">
+      <div><label style="font-size:0.82rem;display:block">宽度 (字符)</label><input type="range" id="width" min="60" max="240" value="120" oninput="convert()" style="width:100px"></div>
+      <div><label style="font-size:0.82rem;display:block">对比度</label><input type="range" id="contrast" min="50" max="200" value="100" oninput="convert()" style="width:100px"></div>
+      <div><label style="font-size:0.82rem;display:block">亮度</label><input type="range" id="brightness" min="0" max="180" value="100" oninput="convert()" style="width:100px"></div>
+      <div><label style="font-size:0.82rem;display:block">字号</label><input type="range" id="fontSize" min="3" max="14" value="6" oninput="document.getElementById('ascii-out').style.fontSize=this.value+'px'" style="width:100px"></div>
+      <button class="btn btn-primary" onclick="copyOutput()">📋 复制</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="tool-panel"><div class="tool-panel-header">📥 原图</div><div style="text-align:center;padding:10px"><img id="preview" style="max-width:100%;max-height:300px" alt=""></div></div>
+      <div class="tool-panel"><div class="tool-panel-header">📤 字符画</div><div id="ascii-out">👆 上传图片开始</div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>setupDropZone();function setupDropZone(){const dz=document.getElementById("dropZone");if(!dz)return;const fi=document.getElementById("fileInput");dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("drag-over")});dz.addEventListener("dragleave",()=>{dz.classList.remove("drag-over")});dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag-over");if(e.dataTransfer.files.length){fi.files=e.dataTransfer.files;loadImage()}})}</script>
+<script>
+// 8-level grayscale: █=full(black) → ░=light → space=white
+const CHARS_8 = ['█','▓','▒','░','◙','◈','·',' '];
+let imgObj = null;
+function loadImage() {
+  const file = document.getElementById('fileInput').files[0];
+  if(!file) return;
+  document.getElementById('preview').src = URL.createObjectURL(file);
+  imgObj = new Image();
+  imgObj.onload = convert;
+  imgObj.src = URL.createObjectURL(file);
+}
+function convert() {
+  if(!imgObj) return;
+  const w = parseInt(document.getElementById('width').value);
+  const contrast = parseInt(document.getElementById('contrast').value) / 100;
+  const brightness = parseInt(document.getElementById('brightness').value) / 100;
+  const canvas = document.createElement('canvas');
+  const h = Math.round(w * imgObj.height / imgObj.width * 0.45);
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imgObj, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let result = '';
+  for(let y=0;y<h;y++) {
+    for(let x=0;x<w;x++) {
+      const i = (y*w+x)*4;
+      let gray = (data[i]*0.299 + data[i+1]*0.587 + data[i+2]*0.114) * brightness;
+      gray = ((gray/255 - 0.5) * contrast + 0.5) * 255;
+      gray = Math.max(0, Math.min(255, gray));
+      result += CHARS_8[Math.floor(gray/255 * 7.99)];
+    }
+    result += '\n';
+  }
+  document.getElementById('ascii-out').textContent = result;
+}
+function copyOutput() { copyText(document.getElementById('ascii-out').textContent); }
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cron表达式在线解析_定时任务翻译 | DevTools</title>
+<meta name="description" content="免费在线Cron表达式解析工具，解释定时任务表达式的含义，列出下次执行时间，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / Cron 表达式解析</div>
+    <div class="tool-header"><h2>⏰ Cron 表达式解析</h2><p>解析与解释 Cron 定时任务表达式</p></div>
+    <div class="tool-panel" style="padding:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="input" placeholder="*/15 * * * *" style="flex:1;min-width:200px;padding:10px 14px;border:2px solid var(--border);border-radius:50px;font-size:1rem;font-family:monospace;background:var(--bg-input);color:var(--text);outline:none" oninput="parseCron()">
+        <button class="btn btn-primary" onclick="parseCron()">解析</button>
+      </div>
+      <div style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary)">格式：分 时 日 月 星期 &nbsp; | &nbsp; 常用：<a href="#" onclick="document.getElementById('input').value='*/5 * * * *';parseCron()">每5分钟</a> · <a href="#" onclick="document.getElementById('input').value='0 9 * * 1-5';parseCron()">工作日9点</a> · <a href="#" onclick="document.getElementById('input').value='0 0 1 * *';parseCron()">每月1号</a></div>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div id="output" style="display:grid;gap:8px;margin-top:8px"></div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const FIELD_NAMES = ['分钟', '小时', '日期', '月份', '星期'];
+function parseSingle(field, min, max, name) {
+  if (field === '*') return '每' + name;
+  if (field.includes(',')) return field.split(',').map(f => parseSingle(f, min, max, name)).join('、');
+  if (field.includes('/')) {
+    const [range, step] = field.split('/');
+    if (range === '*') return '每隔 ' + step + ' ' + name;
+    return '从第 ' + range + ' 开始，每隔 ' + step + ' ' + name;
+  }
+  if (field.includes('-')) {
+    const [s, e] = field.split('-');
+    return name + '从 ' + s + ' 到 ' + e;
+  }
+  return '第 ' + field + ' ' + name;
+}
+
+function calcNext(parts) {
+  const now = new Date();
+  const cronMin = parseInt(parts[0]) || 0;
+  const cronHour = parseInt(parts[1]) || 0;
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), cronHour, cronMin, 0);
+  if (next <= now) next.setMinutes(next.getMinutes() + 1);
+  return next.toLocaleString();
+}
+
+function parseCron() {
+  const v = document.getElementById('input').value.trim();
+  const parts = v.split(/\s+/);
+  if (parts.length < 5) {
+    document.getElementById('output').innerHTML = '<div class="tool-panel" style="padding:14px;color:var(--danger)">❌ 请输入5个字段：分 时 日 月 星期<br>例：*/15 * * * * （每15分钟执行）</div>';
+    return;
+  }
+  const ranges = [[0,59],[0,23],[1,31],[1,12],[0,6]];
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    html += `<div class="tool-panel" style="padding:12px;display:flex;align-items:center;gap:10px"><span style="font-weight:700;font-size:0.85rem;min-width:50px;color:var(--primary)">${FIELD_NAMES[i]}</span><code style="font-size:1.1rem;min-width:60px">${parts[i]}</code><span style="font-size:0.85rem;color:var(--text-secondary)">→ ${parseSingle(parts[i], ranges[i][0], ranges[i][1], FIELD_NAMES[i])}</span></div>`;
+  }
+  html += `<div class="tool-panel" style="padding:14px;text-align:center"><span style="font-weight:600">📅 含义：</span>在 ${parseSingle(parts[2],1,31,'日')} 的 ${parseSingle(parts[3],1,12,'月')}，${parseSingle(parts[4],0,6,'星期')}，${parseSingle(parts[1],0,23,'点')}${parseSingle(parts[0],0,59,'分')}执行</div>`;
+  document.getElementById('output').innerHTML = html;
+}
+document.getElementById('input').value = '*/15 * * * *';
+parseCron();
+</script>
+</body>
+</html>

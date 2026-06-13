@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoremIpsum在线生成器_占位文本假文 | DevTools</title>
+<meta name="description" content="免费在线Lorem Ipsum占位文本生成器，可生成段落、句子、单词数可调，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / Lorem Ipsum 生成器</div>
+    <div class="tool-header"><h2>📝 Lorem Ipsum 生成器</h2><p>生成占位填充文本，支持段落、句子、单词</p></div>
+    <div class="tool-panel" style="padding:16px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <div><label style="font-size:0.85rem;display:block">数量</label><input type="number" id="count" value="3" min="1" max="50" style="width:80px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text)"></div>
+        <div><label style="font-size:0.85rem;display:block">类型</label><select id="type" style="padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)"><option value="paragraphs">段落</option><option value="sentences">句子</option><option value="words">单词</option></select></div>
+        <div><label style="font-size:0.85rem;display:block">语言</label><select id="lang" style="padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)"><option value="lorem">Lorem Ipsum (拉丁)</option><option value="cn">中文假文</option></select></div>
+        <button class="btn btn-primary" onclick="generate()" style="align-self:flex-end">🎲 生成</button>
+      </div>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-panel"><div class="tool-panel-header"><span>📤 生成结果</span><button class="btn btn-sm" onclick="copyOutput()">📋 复制</button></div><div class="output-area" id="output" style="min-height:250px;padding:14px;font-size:0.9rem;line-height:1.8"></div></div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const LOREM = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum';
+const CN_WORDS = '天下万物生于有有生于无道生一一生二二生三三生万物万物负阴而抱阳冲气以为和人之所恶唯孤寡不谷而王公以为称上善若水水善利万物而不争处众人之所恶故几于道居善地心善渊与善仁言善信政善治事善能动善时夫唯不争故无尤';
+const LOREM_WORDS = LOREM.split(' ');
+const CN_ARR = CN_WORDS.split('');
+
+function randWord(lang) {
+  if (lang === 'cn') return CN_ARR[Math.floor(Math.random() * CN_ARR.length)];
+  return LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)];
+}
+
+function generate() {
+  const count = Math.min(Math.max(parseInt(document.getElementById('count').value) || 3, 1), 50);
+  const type = document.getElementById('type').value;
+  const lang = document.getElementById('lang').value;
+  let result = '';
+  if (type === 'words') {
+    const words = []; for (let i = 0; i < count; i++) words.push(randWord(lang));
+    result = words.join(' ');
+  } else if (type === 'sentences') {
+    for (let i = 0; i < count; i++) {
+      const n = 6 + Math.floor(Math.random() * 12);
+      const words = []; for (let j = 0; j < n; j++) words.push(randWord(lang));
+      let s = words.join(' '); s = s.charAt(0).toUpperCase() + s.slice(1) + '.';
+      result += (result ? ' ' : '') + s;
+    }
+  } else {
+    for (let i = 0; i < count; i++) {
+      const lines = 4 + Math.floor(Math.random() * 4);
+      const pWords = []; const pw = lang === 'cn' ? 20+Math.floor(Math.random()*30) : 40+Math.floor(Math.random()*60);
+      for (let j = 0; j < pw; j++) pWords.push(randWord(lang));
+      let p = pWords.join(' ');
+      if (lang === 'lorem' && p.length > 1) p = p.charAt(0).toUpperCase() + p.slice(1) + '.';
+      result += (result ? '\n\n' : '') + p;
+    }
+  }
+  document.getElementById('output').textContent = result;
+}
+
+function copyOutput() { copyText(document.getElementById('output').textContent); }
+generate();
+</script>
+</body>
+</html>

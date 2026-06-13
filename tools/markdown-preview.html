@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown在线编辑器_实时预览MD文档 | DevTools</title>
+<meta name="description" content="免费在线Markdown预览编辑器，实时编辑和预览Markdown文本，支持GitHub风格，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+#preview { padding:14px; overflow-y:auto; min-height:300px; line-height:1.7; }
+#preview h1, #preview h2, #preview h3 { margin: 12px 0 8px; }
+#preview p { margin: 6px 0; }
+#preview code { background: var(--bg-input); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size:0.88em; }
+#preview pre { background: var(--bg-input); padding: 12px; border-radius: var(--radius-sm); overflow-x: auto; }
+#preview pre code { background: none; padding: 0; }
+#preview table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+#preview th, #preview td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / Markdown 预览</div>
+    <div class="tool-header"><h2>📄 Markdown 预览</h2><p>Markdown 实时预览编辑器 — 全在浏览器端完成</p></div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 Markdown 源码</span></div>
+        <textarea id="input" placeholder="在这里写 Markdown..." style="min-height:400px"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>👁️ 预览</span></div>
+        <div id="preview" style="min-height:400px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+const preview = document.getElementById('preview');
+input.addEventListener('input', () => {
+  preview.innerHTML = marked.parse(input.value || '');
+});
+input.value = '# Hello Markdown\n\n## 二级标题\n\n这是一段**加粗文字**和*斜体文字*\n\n- 列表项 1\n- 列表项 2\n\n```js\nconsole.log("code block");\n```\n\n> 引文';
+input.dispatchEvent(new Event('input'));
+</script>
+</body>
+</html>

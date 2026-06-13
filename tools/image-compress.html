@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片在线压缩_无损压缩PNGJPG_调整质量 | DevTools</title>
+<meta name="description" content="免费在线图片压缩工具，调整JPEG/PNG/WebP图片质量和尺寸，浏览器端完成，图片不上传服务器。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 图片压缩</div>
+    <div class="tool-header"><h2>🗜️ 图片压缩</h2><p>拖动滑块调整图片质量，实时预览压缩效果 — 图片不上传</p></div>
+    <div class="drop-zone" id="dropZone" style="margin:8px 0" onclick="document.getElementById('fileInput').click()">
+  <div class="drop-icon">📁</div>
+  <div>拖拽图片到此处，或点击选择文件</div>
+  <input type="file" id="fileInput" accept="image/*" onchange="loadImage()" style="display:none">
+</div>
+    <div style="display:flex;align-items:center;gap:12px;margin:10px 0">
+      <span style="font-size:0.88rem">质量：</span><input type="range" id="quality" min="10" max="100" value="80" oninput="compress()">
+      <span id="qualityVal" style="font-size:0.88rem;font-weight:600">80%</span>
+      <span id="sizeInfo" style="font-size:0.82rem;color:var(--text-secondary)"></span>
+    </div>
+    <button class="btn btn-primary" onclick="downloadImg()" style="margin:8px 0">💾 下载压缩后图片</button>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="tool-panel"><div class="tool-panel-header">📥 原图</div><div style="text-align:center;padding:14px"><img id="original" style="max-width:100%;max-height:400px" alt=""></div></div>
+      <div class="tool-panel"><div class="tool-panel-header">📤 压缩后</div><div style="text-align:center;padding:14px"><img id="compressed" style="max-width:100%;max-height:400px" alt=""></div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>setupDropZone();function setupDropZone(){const dz=document.getElementById("dropZone");if(!dz)return;const fi=document.getElementById("fileInput");dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("drag-over")});dz.addEventListener("dragleave",()=>{dz.classList.remove("drag-over")});dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag-over");if(e.dataTransfer.files.length)fi.files=e.dataTransfer.files;loadImage()})}</script>
+<script>
+let originalBlob = null;
+const qualityEl = document.getElementById('quality');
+const qualityVal = document.getElementById('qualityVal');
+const sizeInfo = document.getElementById('sizeInfo');
+
+function loadImage() {
+  const file = document.getElementById('fileInput').files[0];
+  if(!file) return;
+  originalBlob = file;
+  document.getElementById('original').src = URL.createObjectURL(file);
+  compress();
+}
+
+function compress() {
+  const file = document.getElementById('fileInput').files[0];
+  if(!file) return;
+  const q = parseInt(qualityEl.value) / 100;
+  qualityVal.textContent = Math.round(q*100)+'%';
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width; canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    canvas.toBlob(blob => {
+      document.getElementById('compressed').src = URL.createObjectURL(blob);
+      sizeInfo.textContent = '原图: '+formatSize(file.size)+' → 压缩后: '+formatSize(blob.size)+' (节省 '+Math.round((1-blob.size/file.size)*100)+'%)';
+    }, file.type, q);
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+function downloadImg() {
+  const img = document.getElementById('compressed');
+  if(!img.src) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'compressed_'+(document.getElementById('fileInput').files[0]?.name||'image.jpg');
+  a.click();
+}
+
+function formatSize(b) { return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(2)+'MB'; }
+</script>
+</body>
+</html>

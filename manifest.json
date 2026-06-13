@@ -1,0 +1,12 @@
+{
+  "name": "DevTools - 开发者工具箱",
+  "short_name": "DevTools",
+  "description": "26+ 免费在线开发者工具，全部浏览器端运行",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#4263eb",
+  "background_color": "#f8f9fa",
+  "icons": [
+    {"src":"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>","sizes":"any","type":"image/svg+xml"}
+  ]
+}

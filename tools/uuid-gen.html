@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUID在线生成器_随机唯一ID生成 | DevTools</title>
+<meta name="description" content="免费在线UUID生成器，支持UUID v4随机生成和批量生成，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / UUID 生成器</div>
+    <div class="tool-header"><h2>🆔 UUID 生成器</h2><p>生成 UUID v4（随机）标识符</p></div>
+    <div class="btn-group" style="margin:10px 0">
+      <button class="btn btn-primary" onclick="genOne()">🎲 生成一个 UUID</button>
+      <button class="btn" onclick="genBatch()">📋 批量生成 10 个</button>
+      <button class="btn" onclick="genBatch(50)">📋 生成 50 个</button>
+      <button class="btn" onclick="copyOutput()">📋 复制</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-panel">
+      <div class="tool-panel-header"><span>📤 UUID</span><span id="count" style="font-size:0.78rem"></span></div>
+      <div class="output-area" id="output" style="min-height:300px;padding:14px;font-family:monospace;font-size:0.88rem"></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+function genOne() {
+  document.getElementById('output').textContent = uuidv4();
+  document.getElementById('count').textContent = '';
+  showToast('UUID 已生成 ✓');
+}
+function genBatch(n) {
+  n = n || 10;
+  const ids = Array.from({length:n}, () => uuidv4());
+  document.getElementById('output').textContent = ids.join('\n');
+  document.getElementById('count').textContent = n + ' 个';
+  showToast(n + ' 个 UUID 已生成 ✓');
+}
+function copyOutput() { copyText(document.getElementById('output').textContent); }
+genOne();
+</script>
+</body>
+</html>

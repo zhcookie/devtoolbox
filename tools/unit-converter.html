@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单位在线换算_长度重量温度面积 | DevTools</title>
+<meta name="description" content="免费在线单位换算工具，支持长度、重量、温度、面积、体积等常见单位换算，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 单位换算</div>
+    <div class="tool-header"><h2>📐 单位换算</h2><p>长度、重量、温度、面积、体积等常见单位换算</p></div>
+    <div class="tool-panel" style="padding:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <span style="font-weight:600">类别：</span>
+        <select id="category" onchange="updateUnits()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)">
+          <option value="length">📏 长度</option><option value="weight">⚖️ 重量</option><option value="temperature">🌡️ 温度</option><option value="area">📐 面积</option><option value="volume">🧪 体积</option><option value="speed">🚀 速度</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <input type="number" id="inputVal" step="any" placeholder="输入数值" oninput="convert()" style="width:160px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text)">
+        <select id="fromUnit" onchange="convert()" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)"></select>
+        <span style="font-size:1.2rem">→</span>
+        <select id="toUnit" onchange="convert()" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)"></select>
+        <div id="result" style="font-size:1.4rem;font-weight:700;color:var(--primary);margin-left:8px">—</div>
+      </div>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const units = {
+  length: [
+    {name:'米 (m)',toBase:v=>v,fromBase:v=>v},{name:'厘米 (cm)',toBase:v=>v/100,fromBase:v=>v*100},{name:'毫米 (mm)',toBase:v=>v/1000,fromBase:v=>v*1000},{name:'千米 (km)',toBase:v=>v*1000,fromBase:v=>v/1000},{name:'英寸 (in)',toBase:v=>v*0.0254,fromBase:v=>v/0.0254},{name:'英尺 (ft)',toBase:v=>v*0.3048,fromBase:v=>v/0.3048},{name:'英里 (mi)',toBase:v=>v*1609.344,fromBase:v=>v/1609.344}
+  ],
+  weight: [
+    {name:'千克 (kg)',toBase:v=>v,fromBase:v=>v},{name:'克 (g)',toBase:v=>v/1000,fromBase:v=>v*1000},{name:'毫克 (mg)',toBase:v=>v/1e6,fromBase:v=>v*1e6},{name:'吨 (t)',toBase:v=>v*1000,fromBase:v=>v/1000},{name:'磅 (lb)',toBase:v=>v*0.453592,fromBase:v=>v/0.453592},{name:'盎司 (oz)',toBase:v=>v*0.0283495,fromBase:v=>v/0.0283495}
+  ],
+  temperature: [
+    {name:'摄氏度 (°C)',toBase:v=>v,fromBase:v=>v},{name:'华氏度 (°F)',toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},{name:'开尔文 (K)',toBase:v=>v-273.15,fromBase:v=>v+273.15}
+  ],
+  area: [
+    {name:'平方米 (m²)',toBase:v=>v,fromBase:v=>v},{name:'平方千米 (km²)',toBase:v=>v*1e6,fromBase:v=>v/1e6},{name:'公顷 (ha)',toBase:v=>v*10000,fromBase:v=>v/10000},{name:'亩',toBase:v=>v*666.667,fromBase:v=>v/666.667},{name:'平方英尺 (ft²)',toBase:v=>v*0.092903,fromBase:v=>v/0.092903}
+  ],
+  volume: [
+    {name:'升 (L)',toBase:v=>v,fromBase:v=>v},{name:'毫升 (mL)',toBase:v=>v/1000,fromBase:v=>v*1000},{name:'立方米 (m³)',toBase:v=>v*1000,fromBase:v=>v/1000},{name:'加仑 (gal)',toBase:v=>v*3.78541,fromBase:v=>v/3.78541}
+  ],
+  speed: [
+    {name:'米/秒 (m/s)',toBase:v=>v,fromBase:v=>v},{name:'千米/时 (km/h)',toBase:v=>v/3.6,fromBase:v=>v*3.6},{name:'英里/时 (mph)',toBase:v=>v*0.44704,fromBase:v=>v/0.44704},{name:'节 (kn)',toBase:v=>v*0.514444,fromBase:v=>v/0.514444}
+  ]
+};
+
+function updateUnits() {
+  const cat = document.getElementById('category').value;
+  const list = units[cat];
+  ['fromUnit','toUnit'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = list.map((u,i) => `<option value="${i}" ${(id==='fromUnit'&&i===0)||(id==='toUnit'&&i===1)?'selected':''}>${u.name}</option>`).join('');
+  });
+  convert();
+}
+
+function convert() {
+  const cat = document.getElementById('category').value;
+  const list = units[cat];
+  const val = parseFloat(document.getElementById('inputVal').value);
+  const from = parseInt(document.getElementById('fromUnit').value);
+  const to = parseInt(document.getElementById('toUnit').value);
+  if(isNaN(val)) { document.getElementById('result').textContent = '—'; return; }
+  const base = list[from].toBase(val);
+  const result = list[to].fromBase(base);
+  document.getElementById('result').textContent = result.toPrecision(10).replace(/\.?0+$/,'');
+}
+
+updateUnits();
+</script>
+</body>
+</html>

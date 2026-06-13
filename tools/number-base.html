@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进制在线转换_二进制八进制十六进制 | DevTools</title>
+<meta name="description" content="免费在线进制转换工具，支持二进制、八进制、十进制、十六进制相互转换，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 进制转换</div>
+    <div class="tool-header"><h2>🔢 进制转换</h2><p>2、8、10、16 进制相互转换</p></div>
+    <div class="tool-panel" style="padding:20px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        <div><label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">二进制 (Base 2)</label><input type="text" id="bin" placeholder="1010" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace" oninput="fromBase(2,'bin')"></div>
+        <div><label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">八进制 (Base 8)</label><input type="text" id="oct" placeholder="12" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace" oninput="fromBase(8,'oct')"></div>
+        <div><label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">十进制 (Base 10)</label><input type="text" id="dec" placeholder="10" style="width:100%;padding:10px;border:2px solid var(--primary);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace" oninput="fromBase(10,'dec')"></div>
+        <div><label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">十六进制 (Base 16)</label><input type="text" id="hex" placeholder="A" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace" oninput="fromBase(16,'hex')"></div>
+      </div>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function fromBase(base, src) {
+  const val = document.getElementById(src).value.trim();
+  if(!val) return;
+  try {
+    const n = parseInt(val, base);
+    if(isNaN(n)) return;
+    if(src!=='bin') document.getElementById('bin').value = n.toString(2);
+    if(src!=='oct') document.getElementById('oct').value = n.toString(8);
+    if(src!=='dec') document.getElementById('dec').value = n.toString(10);
+    if(src!=='hex') document.getElementById('hex').value = n.toString(16).toUpperCase();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG在线编辑器_矢量图代码预览 | DevTools</title>
+<meta name="description" content="免费在线SVG编辑器，实时编辑SVG代码并预览效果，下载SVG文件，纯浏览器端。">
+<link rel="stylesheet" href="../style.css">
+<style>#svg-preview{border:1px solid var(--border);border-radius:var(--radius-sm);min-height:300px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden}#svg-preview svg{max-width:100%;max-height:350px}</style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / SVG 编辑器</div>
+    <div class="tool-header"><h2>✏️ SVG 编辑器</h2><p>实时编辑 SVG 代码 & 预览效果 — 纯浏览器端</p></div>
+    <div class="btn-group">
+      <select id="template" onchange="loadTemplate()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)">
+        <option value="">📋 预设模板</option>
+        <option value="heart">❤️ 爱心</option><option value="star">⭐ 星形</option><option value="arrow">➡️ 箭头</option><option value="circle">🔵 圆形</option><option value="gear">⚙️ 齿轮</option>
+      </select>
+      <button class="btn btn-primary" onclick="downloadSVG()">💾 下载 SVG</button>
+      <button class="btn" onclick="copySVG()">📋 复制代码</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel"><div class="tool-panel-header">📥 SVG 代码</div><textarea id="input" placeholder="在这里写 SVG 代码..." style="min-height:350px;font-family:monospace;font-size:0.82rem" oninput="updatePreview()"></textarea></div>
+      <div class="tool-panel"><div class="tool-panel-header">👁️ 预览</div><div id="svg-preview"></div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+const preview = document.getElementById('svg-preview');
+const templates = {
+  heart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">\n  <path d="M50 85 L15 45 A20 20 0 0 1 50 25 A20 20 0 0 1 85 45 Z" fill="#e03131"/>\n</svg>',
+  star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">\n  <polygon points="50,5 61,38 97,38 68,58 79,92 50,72 21,92 32,58 3,38 39,38" fill="#f08c00"/>\n</svg>',
+  arrow: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">\n  <line x1="10" y1="50" x2="70" y2="50" stroke="#4263eb" stroke-width="6" stroke-linecap="round"/>\n  <polygon points="70,50 55,35 55,65" fill="#4263eb"/>\n</svg>',
+  circle: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">\n  <circle cx="100" cy="100" r="60" fill="#5c7cfa" opacity="0.7"/>\n  <circle cx="100" cy="100" r="30" fill="#a855f7"/>\n  <text x="100" y="108" text-anchor="middle" fill="#fff" font-size="20" font-family="sans-serif">SVG</text>\n</svg>',
+  gear: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">\n  <circle cx="100" cy="100" r="90" fill="none" stroke="#6c757d" stroke-width="8" stroke-dasharray="20 10"/>\n  <circle cx="100" cy="100" r="40" fill="none" stroke="#6c757d" stroke-width="8"/>\n  <circle cx="100" cy="100" r="10" fill="#6c757d"/>\n</svg>'
+};
+
+function updatePreview() {
+  preview.innerHTML = input.value || '<p style="color:var(--text-secondary)">在此处输入 SVG 代码</p>';
+}
+function loadTemplate() {
+  const t = document.getElementById('template').value;
+  if (t) { input.value = templates[t]; updatePreview(); }
+}
+function downloadSVG() {
+  const blob = new Blob([input.value], {type:'image/svg+xml'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'drawing.svg'; a.click();
+}
+function copySVG() { copyText(input.value); }
+
+input.value = templates.circle;
+updatePreview();
+</script>
+</body>
+</html>

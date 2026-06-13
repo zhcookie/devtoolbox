@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML实体在线编解码_特殊字符转义 | DevTools</title>
+<meta name="description" content="免费在线HTML实体编解码工具，支持<>等特殊字符的实体化和反转义，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div></nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / HTML 实体编解码</div>
+    <div class="tool-header"><h2>〽️ HTML 实体编解码</h2><p>HTML 特殊字符实体化与反转义 — 浏览器端完成</p></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="encodeHTML()">🔒 编码 (Encode)</button>
+      <button class="btn" onclick="decodeHTML()">🔓 解码 (Decode)</button>
+      <button class="btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="btn" onclick="copyOutput()">📋 复制结果</button>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel"><div class="tool-panel-header">📥 输入</div><textarea id="input" placeholder='输入 HTML 代码或实体文本...'></textarea></div>
+      <div class="tool-panel"><div class="tool-panel-header">📤 输出</div><div class="output-area" id="output"></div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function encodeHTML() {
+  const v = document.getElementById('input').value;
+  document.getElementById('output').textContent = v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function decodeHTML() {
+  const ta = document.createElement('textarea');
+  ta.innerHTML = document.getElementById('input').value;
+  document.getElementById('output').textContent = ta.value;
+}
+function clearAll() { document.getElementById('input').value=''; document.getElementById('output').textContent=''; }
+function copyOutput() { copyText(document.getElementById('output').textContent); }
+document.getElementById('input').value = '<div class="hello">你好 & 世界</div>\n<a href="https://example.com">链接</a>';
+encodeHTML();
+</script>
+</body>
+</html>

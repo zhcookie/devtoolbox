@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unix时间戳在线转换_日期时间互转 | DevTools</title>
+<meta name="description" content="免费在线时间戳转换工具，Unix时间戳与日期时间相互转换，支持秒/毫秒，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 时间戳转换</div>
+    <div class="tool-header"><h2>🕐 时间戳转换</h2><p>Unix 时间戳与日期时间相互转换</p></div>
+    <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+      <button class="btn btn-sm" onclick="putNow()">🕐 当前时间</button>
+      <span id="nowDisplay" style="font-size:0.85rem;color:var(--text-secondary)"></span>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 时间戳 → 日期</span></div>
+        <div style="padding:14px">
+          <input type="number" id="tsInput" placeholder="输入 Unix 时间戳（秒）" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace">
+          <button class="btn btn-primary" onclick="tsToDate()" style="margin-top:8px">转换</button>
+          <div id="tsResult" style="margin-top:10px;font-size:1.1rem;font-weight:600"></div>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📤 日期 → 时间戳</span></div>
+        <div style="padding:14px">
+          <input type="datetime-local" id="dtInput" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text)">
+          <button class="btn" onclick="dateToTs()" style="margin-top:8px">转换</button>
+          <div id="dtResult" style="margin-top:10px;font-family:monospace;font-size:1.1rem;font-weight:600"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+function putNow() {
+  const ts = Math.floor(Date.now()/1000);
+  document.getElementById('tsInput').value = ts;
+  document.getElementById('nowDisplay').textContent = '当前时间戳: '+ts;
+  tsToDate();
+}
+function tsToDate() {
+  const ts = parseInt(document.getElementById('tsInput').value);
+  if(!ts) return;
+  const d = new Date(ts * 1000);
+  document.getElementById('tsResult').innerHTML = formatDT(d) + '<br><span style="font-size:0.82rem;color:var(--text-secondary)">UTC: '+d.toISOString()+'</span>';
+}
+function dateToTs() {
+  const val = document.getElementById('dtInput').value;
+  if(!val) return;
+  const d = new Date(val);
+  const ts = Math.floor(d.getTime()/1000);
+  document.getElementById('dtResult').textContent = 'Unix 时间戳: ' + ts + '\n毫秒: ' + d.getTime();
+}
+function formatDT(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')+' (本地时间)'; }
+putNow();
+</script>
+</body>
+</html>

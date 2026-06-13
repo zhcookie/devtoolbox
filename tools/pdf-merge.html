@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF在线合并工具_免费合并PDF文件 | DevTools</title>
+<meta name="description" content="免费在线PDF合并工具，多选PDF文件按顺序合并为一个PDF，浏览器端完成，文件不上传。">
+<link rel="stylesheet" href="../style.css">
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / PDF 合并</div>
+    <div class="tool-header"><h2>📑 PDF 合并</h2><p>选择多个 PDF 文件，按顺序合并为一个 — 文件不上传服务器</p></div>
+    <div class="drop-zone" id="dropZone" style="margin:10px 0" onclick="document.getElementById('fileInput').click()">
+  <div class="drop-icon">📑</div>
+  <div>拖拽 PDF 文件到此处，或点击选择（可多选）</div>
+  <input type="file" id="fileInput" accept=".pdf" multiple onchange="showFiles()" style="display:none">
+</div>
+    <div id="fileList" style="font-size:0.88rem;color:var(--text-secondary);margin:8px 0"></div>
+    <div class="btn-group" style="margin:10px 0">
+      <button class="btn btn-primary" onclick="mergePDFs()">📑 合并 PDF</button>
+      <button class="btn" id="downloadBtn" style="display:none" onclick="downloadPDF()">💾 下载合并结果</button>
+    </div>
+    <div id="status" style="font-size:0.88rem;margin:8px 0"></div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>setupDropZone();function setupDropZone(){const dz=document.getElementById("dropZone");if(!dz)return;const fi=document.getElementById("fileInput");dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("drag-over")});dz.addEventListener("dragleave",()=>{dz.classList.remove("drag-over")});dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag-over");if(e.dataTransfer.files.length){fi.files=e.dataTransfer.files;showFiles()}})}</script>
+<script>
+let mergedBytes = null;
+function showFiles() {
+  const files = document.getElementById('fileInput').files;
+  document.getElementById('fileList').innerHTML = files.length ? '📄 已选择 ' + files.length + ' 个文件：<br>' + [...files].map((f,i) => (i+1)+'. '+f.name+' ('+formatSize(f.size)+')').join('<br>') : '';
+}
+
+async function mergePDFs() {
+  const files = document.getElementById('fileInput').files;
+  if(files.length<2) { showToast('请至少选择2个PDF文件'); return; }
+  const status = document.getElementById('status');
+  status.innerHTML = '<span style="color:var(--warning)">⏳ 正在合并...</span>';
+  try {
+    const merged = await PDFLib.PDFDocument.create();
+    for(const file of files) {
+      const buf = await readFileAsArrayBuffer(file);
+      const pdf = await PDFLib.PDFDocument.load(buf);
+      const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
+    }
+    mergedBytes = await merged.save();
+    status.innerHTML = '<span style="color:var(--success)">✅ 合并完成！共 ' + merged.getPageCount() + ' 页，大小 ' + formatSize(mergedBytes.length) + '</span>';
+    document.getElementById('downloadBtn').style.display = '';
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--danger)">❌ 合并失败：' + e.message + '</span>';
+  }
+}
+
+function downloadPDF() {
+  if(!mergedBytes) return;
+  const blob = new Blob([mergedBytes], {type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'merged.pdf'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function formatSize(b) { return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(2)+'MB'; }
+</script>
+</body>
+</html>

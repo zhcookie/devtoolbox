@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正则表达式在线测试工具_Regex调试 | DevTools</title>
+<meta name="description" content="免费在线正则表达式测试工具，支持JavaScript正则语法，实时匹配高亮，捕获组显示，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+<style>.match-highlight { background: #ffd43b; color: #000; border-radius: 2px; padding: 0 2px; }</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 正则表达式测试</div>
+    <div class="tool-header"><h2>🔍 正则表达式测试</h2><p>测试与调试正则表达式 — JavaScript 语法</p></div>
+    <div class="tool-panel" style="padding:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span>/</span><input type="text" id="pattern" placeholder="正则表达式" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text);font-family:monospace;font-size:0.9rem" value="\\d+"><span>/</span>
+      <select id="flags" style="padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)">
+        <option value="">无</option><option value="g">g - 全局</option><option value="i">i - 忽略大小写</option><option value="m">m - 多行</option><option value="gi">gi - 全局+忽略大小写</option><option value="gm">gm - 全局+多行</option><option value="im">im - 忽略大小写+多行</option><option value="gim">gim - 全部</option>
+      </select>
+    </div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-body">
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📥 测试文本</span></div>
+        <textarea id="input" placeholder="输入测试文本..." style="min-height:250px"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="tool-panel-header"><span>📤 结果</span><span id="matches-count" style="font-size:0.78rem"></span></div>
+        <div class="output-area" id="output" style="min-height:250px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const patternEl = document.getElementById('pattern');
+const flagsEl = document.getElementById('flags');
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const countEl = document.getElementById('matches-count');
+
+function test() {
+  try {
+    const re = new RegExp(patternEl.value, flagsEl.value);
+    const matches = [...input.value.matchAll(re)];
+    countEl.textContent = matches.length + ' 个匹配';
+    if (matches.length === 0) { output.innerHTML = '<span style="color:var(--text-secondary)">无匹配</span>'; return; }
+    let lines = [];
+    matches.forEach((m, i) => {
+      lines.push(`<strong>匹配 ${i+1}:</strong> <code>${escapeHTML(m[0])}</code> (位置: ${m.index})`);
+      if (m.length > 1) {
+        m.slice(1).forEach((g, gi) => lines.push(`  组${gi+1}: <code>${escapeHTML(g || '')}</code>`));
+      }
+    });
+    output.innerHTML = lines.join('<br>');
+  } catch(e) {
+    output.innerHTML = '<span style="color:var(--danger)">正则错误：' + e.message + '</span>';
+    countEl.textContent = '';
+  }
+}
+
+function escapeHTML(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+patternEl.addEventListener('input', test);
+flagsEl.addEventListener('change', test);
+input.addEventListener('input', test);
+
+input.value = 'Phone: 13812345678, Age: 25, Zip: 100081';
+test();
+</script>
+</body>
+</html>

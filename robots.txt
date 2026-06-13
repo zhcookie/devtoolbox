@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://devtoolbox-53g.pages.dev/sitemap.xml

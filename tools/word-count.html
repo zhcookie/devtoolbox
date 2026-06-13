@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在线字数统计_字符计数_单词统计 | DevTools</title>
+<meta name="description" content="免费在线字数统计工具，统计字符数、单词数、行数、中文字数，浏览器端完成。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand"><span class="icon">🔧</span> DevTools</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="tool-page">
+    <div class="breadcrumb"><a href="/">首页</a> / 字数统计</div>
+    <div class="tool-header"><h2>🔢 字数统计</h2><p>实时统计文本的字符数、单词数、行数</p></div>
+    <div class="ad-slot horizontal">📢 广告位</div>
+    <div class="tool-panel">
+      <div class="tool-panel-body">
+        <textarea id="input" placeholder="输入或粘贴文本..." style="min-height:250px;border:none;padding:14px;font-size:0.9rem;background:var(--bg-input);color:var(--text);resize:vertical;outline:none"></textarea>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:16px">
+      <div class="tool-panel" style="text-align:center;padding:16px"><div style="font-size:2rem;font-weight:700;color:var(--primary)" id="count-chars">0</div><div style="color:var(--text-secondary);font-size:0.85rem">字符数（含空格）</div></div>
+      <div class="tool-panel" style="text-align:center;padding:16px"><div style="font-size:2rem;font-weight:700;color:var(--primary)" id="count-no-spaces">0</div><div style="color:var(--text-secondary);font-size:0.85rem">字符数（无空格）</div></div>
+      <div class="tool-panel" style="text-align:center;padding:16px"><div style="font-size:2rem;font-weight:700;color:var(--primary)" id="count-words">0</div><div style="color:var(--text-secondary);font-size:0.85rem">单词数</div></div>
+      <div class="tool-panel" style="text-align:center;padding:16px"><div style="font-size:2rem;font-weight:700;color:var(--primary)" id="count-lines">0</div><div style="color:var(--text-secondary);font-size:0.85rem">行数</div></div>
+      <div class="tool-panel" style="text-align:center;padding:16px"><div style="font-size:2rem;font-weight:700;color:var(--primary)" id="count-bytes">0</div><div style="color:var(--text-secondary);font-size:0.85rem">字节数 (UTF-8)</div></div>
+    </div>
+  </div>
+</div>
+<footer class="footer"><p>© 2026 DevTools</p></footer>
+<script src="../script.js"></script>
+<script>
+const input = document.getElementById('input');
+input.addEventListener('input', () => {
+  const v = input.value;
+  document.getElementById('count-chars').textContent = v.length;
+  document.getElementById('count-no-spaces').textContent = v.replace(/\s/g,'').length;
+  document.getElementById('count-words').textContent = (v.trim()?v.trim().split(/\s+/).length:0);
+  document.getElementById('count-lines').textContent = (v?v.split('\n').length:0);
+  document.getElementById('count-bytes').textContent = new TextEncoder().encode(v).length;
+});
+input.value = 'Hello World\n这是一段测试文本。\nThe quick brown fox jumps over the lazy dog.';
+input.dispatchEvent(new Event('input'));
+</script>
+</body>
+</html>
